@@ -99,6 +99,7 @@ unsigned char		*send_and_receive_manager(int sockfd, int client_type,
 
 		sleep(5);
 		received_buffer = recv_loop(sockfd, CLIENT);
+		/*
 		printf("CURRENT BUFFER : ");
 		DEBUG_BUFFER(received_buffer, 40);
 		recv_buffer_size = get_buffer_size_for_recv(received_buffer);
@@ -109,6 +110,7 @@ unsigned char		*send_and_receive_manager(int sockfd, int client_type,
 			recv_buffer_size * 512);
 		sleep(5);
 		recv(sockfd, remote_filesystem, recv_buffer_size * 2, 0);
+		*/
 	}
 	else
 	{
@@ -121,8 +123,9 @@ unsigned char		*send_and_receive_manager(int sockfd, int client_type,
 		printf("CURRENT BUFFER : ");
 		DEBUG_BUFFER(received_buffer, 40);
 		buffer_to_send = serialize_transmission_buffer(transmission_buffer);
+		
 		send_loop(sockfd, buffer_to_send, SERVER);
-	
+		/*
 		recv_buffer_size = get_buffer_size_for_recv(received_buffer);
 	
 		sleep(5);
@@ -134,10 +137,12 @@ unsigned char		*send_and_receive_manager(int sockfd, int client_type,
 		sleep(5);	
 		recv(sockfd, remote_filesystem, recv_buffer_size + 512, 0);
 	//	send(sockfd, buffer_to_send, recv_buffer_size + 512, 0);
+	*/
 	}
 //	DEBUG_BUFFER(remote_filesystem, recv_buffer_size);
-
+	exit(1);
 	return (remote_filesystem);
+
 }	
 
 

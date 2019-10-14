@@ -19,6 +19,25 @@ void	print_file_list(t_file_list *head)
 	}
 }
 
+void	DEBUG_BUFFER_TO_FILE(unsigned char *buffer_start, uint64_t byte_count,
+	char *filename)
+{
+	size_t			i;
+	FILE			*fp;
+
+	fp = fopen(filename, "ab+");
+	i = 0;
+	while (i < byte_count)
+	{
+		if (isprint(buffer_start[i]))
+			printf("%c", buffer_start[i]);
+		else
+			printf("%x", buffer_start[i]);
+		i++;
+	}
+	fclose(fp);
+}
+
 void	DEBUG_BUFFER(unsigned char *buffer_start, uint64_t byte_count)
 {
 	size_t			i;
