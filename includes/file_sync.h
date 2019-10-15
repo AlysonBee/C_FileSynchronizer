@@ -79,6 +79,14 @@ typedef struct s_directory {
 }	t_dir;
 
 
+typedef struct	s_file_and_timestamp {
+	char	*filename;
+	time_t	timestamp;
+	bool	to_send;
+	struct s_file_and_timestamp *next;
+}	t_ft;
+
+
 /* utils.c */
 
 char	*parse_command_line_flags(int argc, char **argv);
@@ -97,6 +105,12 @@ void	client(char **argv);
 void	DEBUG_BUFFER(unsigned char *buffer_start,
 	uint64_t byte_count);
 void	print_buffer_number(unsigned char *transmission_buffer);
+
+/* file_and_timestamp_linked_list_manager.c */
+
+t_ft	*create_and_add_file_timestamp(t_ft *head_node,
+	char *filename, time_t timestamp);
+t_ft	*inspect_directory(t_ft *head_node, char *directory_name);
 
 /* handshake/file_list_linked_list_manager */
 
@@ -129,6 +143,7 @@ t_file_list	 	*gather_all_file_info(void);
 t_file_list	 	*all_files_on_this_client(char *current_directory,
 	t_file_list *file_list);
 time_t			extract_file_timestamp(char *target_file);
+char 			*generate_path(char *directory_name, char *filename);
 
 /* handshake/deserialize_transmission_buffer.c */
 

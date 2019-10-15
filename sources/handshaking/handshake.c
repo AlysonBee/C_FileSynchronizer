@@ -107,5 +107,7 @@ void	handshake(int sockfd, int client_type)
 		transmission_buffer_template);
 
 	resolve_file_conflicts(remote_filesystem);
+
+	return ;
 }
 

@@ -3,7 +3,7 @@
 #include "../../includes/file_sync.h"
 
 
-static char 	*generate_path(char *directory_name, char *filename)
+char 	*generate_path(char *directory_name, char *filename)
 {
 	char	*temporary;
 	char	*complete_filename;
