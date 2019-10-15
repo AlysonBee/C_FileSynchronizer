@@ -82,65 +82,165 @@ unsigned char		*recv_loop(int sockfd, int type)
 	return (buffer_size_info);
 }
 
+static void			controlled_send(int sockfd, unsigned char *buffer,
+	int64_t byte_size)
+{
+	uint64_t		size;
+	uint64_t		max;
+	char			halt[3];
+	
+	max = 0;
+	size = 0;
+	max = byte_size;
+	while (byte_size > 0)
+	{
+		printf("send\n");
+		send(sockfd, buffer, 2500, 0);
+		DEBUG_BUFFER(buffer, 2500);
+		sleep(1);
+		max++;
+		byte_size -= 2500;
+		size += 2500;
+		buffer += 2500;
+		if (byte_size - 2500 < 0)
+		{
+			send(sockfd, buffer, byte_size, 0);
+			break;
+		}
+	//	printf("recv\n");
+	//	recv(sockfd, halt, 500, 0);
+	}
+}
+
+static void			controlled_recv(int sockfd, unsigned char *buffer,
+	int64_t byte_size)
+{
+	uint64_t	size;
+	uint64_t	max;
+
+	max = 0;
+	size = 0;
+	unsigned char *ptr;
+	ptr = buffer;
+	while (byte_size > 0)
+	{
+		printf("recv\n");
+		recv(sockfd, buffer, 2500, 0);
+		DEBUG_BUFFER(buffer, 2500);
+		sleep(1);
+		byte_size -= 2500;
+		buffer += 2500;
+		size += 2500;
+		if (byte_size - 2500 < 0)
+		{
+			recv(sockfd, buffer, byte_size, 0);
+			break;
+		}
+	//	buffer += size;
+		max++;
+		printf("%zu left\n", byte_size);
+	}
+	DEBUG_BUFFER(ptr, 100000);
+}
+
+
+
+static uint64_t		send_incoming_buffer_size(int sockfd, unsigned char *buffer,
+	int type)
+{
+	uint64_t		buffer_size;
+	ssize_t			size;
+	char			*buffer_content;
+	char			number_storage[4096];
+	int				i;
+	i = 0;
+	
+	buffer_size = total_file_size(buffer);	
+	buffer_content = itoa(buffer_size);
+	if (type == SERVER)
+	{
+		send(sockfd, buffer_content, strlen(buffer_content) + 1, 0);
+		sleep(5);
+		size = recv(sockfd, number_storage, 4096, 0);
+		while (i < 20)
+		{
+			if (isdigit(number_storage[i]))
+				break;
+			i++;
+		}
+	}
+	else
+	{
+		size = recv(sockfd, number_storage, 4096, 0);
+		while (i < 20)
+		{
+			if (isdigit(number_storage[i]))
+				break;
+			i++;
+		}
+		send(sockfd, buffer_content, strlen(buffer_content) + 1, 0);
+	}
+	return ((uint64_t)atoi(&number_storage[i]));
+}
+
+
+
 unsigned char		*send_and_receive_manager(int sockfd, int client_type,
 	t_local_file_list *transmission_buffer)
 {
 	unsigned char	*buffer_to_send;
-	int64_t			recv_buffer_size;
+	int64_t			size;
 	unsigned char	*received_buffer;
 	unsigned char	*remote_filesystem;
+	int64_t			local_buffer_size;
+	unsigned char	*head_ptr;
 
 	if (client_type == CLIENT)
 	{
-		printf("CLIENT\n");
 		buffer_to_send = serialize_transmission_buffer(transmission_buffer);
-		printf("Sending payload...\n");
-		send_loop(sockfd, buffer_to_send, CLIENT);
-
-		sleep(5);
-		received_buffer = recv_loop(sockfd, CLIENT);
-		/*
-		printf("CURRENT BUFFER : ");
-		DEBUG_BUFFER(received_buffer, 40);
-		recv_buffer_size = get_buffer_size_for_recv(received_buffer);
+		size = send_incoming_buffer_size(sockfd, buffer_to_send, CLIENT);
+		printf("size is %zu\n", size);
 		
-		send(sockfd, buffer_to_send, recv_buffer_size * 2, 0);
+		local_buffer_size = total_file_size(buffer_to_send);
+		printf("sending\n");
 		sleep(5);
-		remote_filesystem = (unsigned char*)malloc(sizeof(unsigned char) *
-			recv_buffer_size * 512);
+		controlled_send(sockfd, buffer_to_send, local_buffer_size);
+	//	send(sockfd, buffer_to_send, local_buffer_size, 0);
+		printf("Sent\n\n\n\n\n\n\n\n");
+		DEBUG_BUFFER(buffer_to_send, local_buffer_size);	
+		
 		sleep(5);
-		recv(sockfd, remote_filesystem, recv_buffer_size * 2, 0);
-		*/
+		remote_filesystem = (unsigned char *)malloc(sizeof(unsigned char)
+			* size * 2);
+		controlled_recv(sockfd, remote_filesystem, size);
+		printf("\n\n\n\n\n\n\n\n\n");
+		DEBUG_BUFFER(remote_filesystem, size);
+		printf("CLIENT\n");
 	}
 	else
 	{
-		sleep(5);
-		printf("SERVER\n");
-		printf("Receiving payload...\n");
-		received_buffer = recv_loop(sockfd, SERVER);
-		
-		printf("Sending payload...\n");
-		printf("CURRENT BUFFER : ");
-		DEBUG_BUFFER(received_buffer, 40);
 		buffer_to_send = serialize_transmission_buffer(transmission_buffer);
-		
-		send_loop(sockfd, buffer_to_send, SERVER);
-		/*
-		recv_buffer_size = get_buffer_size_for_recv(received_buffer);
-	
-		sleep(5);
+		size = send_incoming_buffer_size(sockfd, buffer_to_send, SERVER);
+		printf("size is %lld\n", size);	
 		remote_filesystem = (unsigned char *)malloc(sizeof(unsigned char)
-			* recv_buffer_size + 512);
+			* size * 2);
+		bzero(remote_filesystem, size * 2);	
+		head_ptr = remote_filesystem;
+		printf("REceiving...\n");
+	//	recv(sockfd, remote_filesystem, size, 0);	
+		controlled_recv(sockfd, remote_filesystem, size);
+		printf("RECVIED..............\n\n\n");
+		DEBUG_BUFFER(head_ptr, size);
 
-		send(sockfd, buffer_to_send, recv_buffer_size + 512, 0);
-	
-		sleep(5);	
-		recv(sockfd, remote_filesystem, recv_buffer_size + 512, 0);
-	//	send(sockfd, buffer_to_send, recv_buffer_size + 512, 0);
-	*/
+		sleep(5);
+		local_buffer_size = total_file_size(buffer_to_send);
+		controlled_send(sockfd, buffer_to_send, local_buffer_size);
+		printf("SERVER\n");
+		printf("\n\n\n\n\n\n\n\n");
+		DEBUG_BUFFER(buffer_to_send, local_buffer_size);
 	}
 //	DEBUG_BUFFER(remote_filesystem, recv_buffer_size);
-	exit(1);
+//	exit(1);
 	return (remote_filesystem);
 
 }	

@@ -53,7 +53,8 @@ static void		directory_path_management(t_file_list *file_info)
 			directory_name = sub(file_info->filename, 0, counter);
 			if (check_folder_path_exists(directory_name) == false)
 			{
-				printf("CREATING %s\n", directory_name);
+				printf(">");
+			//	printf("CREATING %s\n", directory_name);
 			//	mkdir(directory_name, 0755);
 			//	create_subdirectory(counter, file_info);
 			}

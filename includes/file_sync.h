@@ -85,6 +85,7 @@ char	*parse_command_line_flags(int argc, char **argv);
 void	print_file_list(t_file_list *head);
 void	DEBUG_BUFFER_TO_FILE(unsigned char *buffer_start, uint64_t byte_count,
 	char *filename);
+uint64_t	total_file_size(unsigned char *buffer);
 
 /* server.c */
 

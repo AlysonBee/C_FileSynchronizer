@@ -38,6 +38,30 @@ void	DEBUG_BUFFER_TO_FILE(unsigned char *buffer_start, uint64_t byte_count,
 	fclose(fp);
 }
 
+
+uint64_t	total_file_size(unsigned char *buffer)
+{
+	uint64_t	counter;
+	int			magic_number_counter;
+
+	magic_number_counter = 0;
+	counter = 0;
+	while (magic_number_counter < 3)
+	{
+		if (buffer[counter] == 0x44 &&
+			buffer[counter + 1] == 0x55 &&
+			buffer[counter + 2] == 0x66 &&
+			buffer[counter + 3] == 0x77)
+			{
+				break;
+				magic_number_counter++;
+			}
+		counter++;
+	}
+	return (counter);
+}
+
+
 void	DEBUG_BUFFER(unsigned char *buffer_start, uint64_t byte_count)
 {
 	size_t			i;
