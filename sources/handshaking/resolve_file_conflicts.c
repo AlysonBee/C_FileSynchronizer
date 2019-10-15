@@ -54,8 +54,8 @@ static void		directory_path_management(t_file_list *file_info)
 			if (check_folder_path_exists(directory_name) == false)
 			{
 				printf(">");
-			//	printf("CREATING %s\n", directory_name);
-			//	mkdir(directory_name, 0755);
+				printf("CREATING %s\n", directory_name);
+				mkdir(directory_name, 0755);
 			//	create_subdirectory(counter, file_info);
 			}
 		}
@@ -63,14 +63,23 @@ static void		directory_path_management(t_file_list *file_info)
 	}
 }
 
+void			write_file_content(t_file_list *file_to_change)
+{
+	int 		fd;
+	
+	fd = open(file_to_change->filename, O_RDWR | O_CREAT, 0755);
+	write(fd, file_to_change->file_content, file_to_change->filesize);
+	close(fd);
+}
 
 static void		overwrite_older_file_version(t_file_list *file_to_change)
-{
+{	
 	if (strchr(file_to_change->filename, '/'))
 	{
 		directory_path_management(file_to_change);
 	}
 	printf("CREATING FILE : %s\n", file_to_change->filename);
+	write_file_content(file_to_change);
 }
 
 void			resolve_file_conflicts(unsigned char *remote_file_system)
