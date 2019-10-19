@@ -31,6 +31,19 @@ t_ft	*add_file_and_timestamp(t_ft *head_node, char *filename,
 	return (ft_traverse);
 }
 
+void    free_file_timestamp(t_ft *head_node)
+{
+    t_ft    *travel;
+
+    while (head_node)
+    {
+        travel = head_node;
+        free(head_node->filename);
+        head_node = head_node->next;
+        free(travel);
+    }
+}
+
 t_ft	*create_and_add_file_timestamp(t_ft *head_node,
 	char *filename, time_t timestamp)
 {

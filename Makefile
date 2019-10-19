@@ -24,9 +24,13 @@ handshake_list = handshake.c \
 				 directory_linked_list_manager.c \
 				 resolve_file_conflicts.c
 
-source_list = main.c initialize_daemon.c utils.c server.c client.c
+source_list = main.c initialize_daemon.c utils.c server.c client.c \
+			  user_loop.c user_loop_socket_monitor.c daemon_operation.c \
+			  file_and_timestamp_linked_list_manager.c inspect_directory.c
 
 flags = -Wall -Wextra -pedantic -pedantic-errors
+
+links = -lpthread
 
 handshake_objects_list = $(handshake_list:.c=.o)
 objects_list = $(source_list:.c=.o)
@@ -39,12 +43,12 @@ objects = $(addprefix $(objects_directory), $(objects_list) $(handshake_objects_
 all:
 	make all -C $(alylibc)
 	gcc -c $(flags) $(sources) $(handshakes)
-	gcc -o $(executable) $(objects_list) $(handshake_objects_list) $(alylibc_archive)
+	gcc -o $(executable) $(objects_list) $(handshake_objects_list) $(alylibc_archive) $(links)
 	mv $(objects_list) $(handshake_objects_list) $(objects_directory)
 
 clean:
 	make clean -C $(alylibc)
-	rm -f $(executable)
+	rm -f $(objects)
 
 fclean:
 	make fclean -C $(alylibc)

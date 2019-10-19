@@ -3,7 +3,7 @@
 #include "../includes/file_sync.h"
 #include "../includes/handshake.h"
 
-static int		accept_loop(int *sockfd, struct sockaddr_in socket_address)
+int		accept_loop(int *sockfd, struct sockaddr_in socket_address)
 {
 	socklen_t	address_length;
 	int			accept_socket;
@@ -30,6 +30,10 @@ static void 	server_loop(int sockfd,
 	accept_socket = accept_loop(&sockfd, socket_address);
 	
 	handshake(accept_socket, SERVER);
+
+
+    printf("Server spinning a daemon...\n");
+    user_loop(accept_socket, socket_address);
 
 }
 

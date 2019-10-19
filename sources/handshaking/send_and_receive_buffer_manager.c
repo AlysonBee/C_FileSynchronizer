@@ -2,20 +2,21 @@
 
 #include "../../includes/file_sync.h"
 
-static void			controlled_send(int sockfd, unsigned char *buffer,
+void			controlled_send(int sockfd, unsigned char *buffer,
 	int64_t byte_size)
 {
-	uint64_t		size;
+	ssize_t		size;
+	
 	
 	size = 0;
 	while (byte_size > 0)
 	{
-		send(sockfd, buffer, 2500, 0);
-		sleep(1);
-		byte_size -= 2500;
-		size += 2500;
-		buffer += 2500;
-		if (byte_size - 2500 < 0)
+		size = send(sockfd, buffer, 2500, 0);
+//		sleep(1);
+		byte_size -= size;//2500;
+		//size += 2500;
+		buffer += size;//2500;
+		if (byte_size - size < 0)
 		{
 			send(sockfd, buffer, byte_size, 0);
 			break;
@@ -23,20 +24,20 @@ static void			controlled_send(int sockfd, unsigned char *buffer,
 	}
 }
 
-static void			controlled_recv(int sockfd, unsigned char *buffer,
+void			controlled_recv(int sockfd, unsigned char *buffer,
 	int64_t byte_size)
 {
-	uint64_t	size;
+	ssize_t	size;
 
 	size = 0;
 	while (byte_size > 0)
 	{
-		recv(sockfd, buffer, 2500, 0);
-		sleep(1);
-		byte_size -= 2500;
-		buffer += 2500;
-		size += 2500;
-		if (byte_size - 2500 < 0)
+		size = recv(sockfd, buffer, 2500, 0);
+	//	sleep(1);
+		byte_size -= size;//2500;
+		buffer  += size; //2500;
+	//	size += 2500;
+		if (byte_size - size < 0)
 		{
 			recv(sockfd, buffer, byte_size, 0);
 			break;
@@ -46,7 +47,7 @@ static void			controlled_recv(int sockfd, unsigned char *buffer,
 
 
 
-static uint64_t		send_incoming_buffer_size(int sockfd, unsigned char *buffer,
+uint64_t		send_incoming_buffer_size(int sockfd, unsigned char *buffer,
 	int type)
 {
 	uint64_t		buffer_size;

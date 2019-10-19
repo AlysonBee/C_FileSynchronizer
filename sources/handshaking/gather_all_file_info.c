@@ -14,7 +14,7 @@ char 	*generate_path(char *directory_name, char *filename)
 	return (complete_filename);
 }
 
-static uint64_t		extract_file_size(char *target_file)
+uint64_t		extract_file_size(char *target_file)
 {
 	struct stat		info;
 	uint64_t		file_size;
@@ -36,7 +36,7 @@ time_t				extract_file_timestamp(char *target_file)
 	return (mtime);
 }
 
-static unsigned char	*extract_file_content(char *target_file)
+unsigned char	*extract_file_content(char *target_file)
 {
 	unsigned char	*file_content;
 	int				fd;

@@ -79,7 +79,7 @@ static void		overwrite_older_file_version(t_file_list *file_to_change)
 		directory_path_management(file_to_change);
 	}
 	printf("CREATING FILE : %s\n", file_to_change->filename);
-	write_file_content(file_to_change);
+//	write_file_content(file_to_change);
 }
 
 void			resolve_file_conflicts(unsigned char *remote_file_system)

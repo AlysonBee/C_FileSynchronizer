@@ -2,6 +2,7 @@
 #ifndef FILE_SYNC
 #define FILE_SYNC
 
+#include <sys/select.h>
 #include <sys/stat.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
@@ -25,6 +26,14 @@
 #define MAGIC_NUMBER 0xE0D5CD7185
 #define SERVER 1
 #define CLIENT 2
+#define MAX_AMOUNT_OF_NODES 3
+#define SEND_SAVE 1
+#define RECV_SAVE 2
+
+typedef struct  s_node_connection_list {
+    int sockfd;
+    int node_list[MAX_AMOUNT_OF_NODES];
+}   t_node;
 
 /* The transmission header is the section of bytes at the very start of a constructed
 ** bufffer to be sent to the neighboring client.
@@ -98,6 +107,7 @@ uint64_t	total_file_size(unsigned char *buffer);
 /* server.c */
 
 void	server(char **argv);
+int		accept_loop(int *sockfd, struct sockaddr_in socket_address);
 
 /* client.c */
 
@@ -106,16 +116,33 @@ void	DEBUG_BUFFER(unsigned char *buffer_start,
 	uint64_t byte_count);
 void	print_buffer_number(unsigned char *transmission_buffer);
 
+/* user_loop.c */
+
+void       user_loop(int sockfd, struct sockaddr_in socket_address);
+
+/* user_loop_socket_monitor.c */
+
+int    socket_monitor(int remote_conn_socket, int daemon_socket);
+
 /* file_and_timestamp_linked_list_manager.c */
 
 t_ft	*create_and_add_file_timestamp(t_ft *head_node,
 	char *filename, time_t timestamp);
 t_ft	*inspect_directory(t_ft *head_node, char *directory_name);
+void    free_file_timestamp(t_ft *head_node);
+
+/* daemon_operation.c */
+
+void        daemon_operation(int sockfd);
 
 /* handshake/file_list_linked_list_manager */
 
 t_file_list		*create_and_add_file_list_node(t_file_list *head,
 	char *filename,
+	uint64_t filesize,
+	time_t timestamp,
+	unsigned char *file_content);
+t_file_list		*new_file_list_node(char *filename,
 	uint64_t filesize,
 	time_t timestamp,
 	unsigned char *file_content);
@@ -143,6 +170,8 @@ t_file_list	 	*gather_all_file_info(void);
 t_file_list	 	*all_files_on_this_client(char *current_directory,
 	t_file_list *file_list);
 time_t			extract_file_timestamp(char *target_file);
+uint64_t		extract_file_size(char *target_file);
+unsigned char	*extract_file_content(char *target_file);
 char 			*generate_path(char *directory_name, char *filename);
 
 /* handshake/deserialize_transmission_buffer.c */
@@ -154,6 +183,12 @@ uint64_t		extract_number_from_buffer(unsigned char *receive_buffer);
 
 unsigned char	*send_and_receive_manager(int sockfd, int client_type,
 	t_local_file_list *file_list);
+void			controlled_send(int sockfd, unsigned char *buffer,
+	int64_t byte_size);
+void			controlled_recv(int sockfd, unsigned char *buffer,
+	int64_t byte_size);
+uint64_t		send_incoming_buffer_size(int sockfd, unsigned char *buffer,
+	int type);
 
 /* handshake/directory_linked_list_manager.c */
 

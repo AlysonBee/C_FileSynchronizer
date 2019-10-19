@@ -65,17 +65,6 @@ t_ft	*inspect_directory(t_ft *head_node, char *directory_name)
 	return (traverse_inspection(ft_traverse, dir_list));
 }
 
-void		polling(void)
-{§
-	
-
-	while (true)
-	{
-		
-	}
-
-}
-
 /*
 int	main(void)
 {
@@ -94,4 +83,4 @@ int	main(void)
 		trav = trav->next;
 	}
 	return (0);
-}  */
+} */

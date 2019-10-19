@@ -2,15 +2,15 @@
 
 #include "../includes/file_sync.h"
 
+
 void	client_loop(int sockfd, struct sockaddr_in socket_address)
 {
 	handshake(sockfd, CLIENT);
 
-	
+    
 
 	return ;
 }
-
 
 void	client(char **argv)
 {
