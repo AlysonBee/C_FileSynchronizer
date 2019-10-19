@@ -30,6 +30,15 @@
 #define SEND_SAVE 1
 #define RECV_SAVE 2
 
+
+typedef struct  s_thread_sockets {
+    int internal_server_port;
+    int parent_socket;
+}   t_thread_sock;
+
+/* This section is to expand the codebase to handle mutlipe client communication.
+ */
+
 typedef struct  s_node_connection_list {
     int sockfd;
     int node_list[MAX_AMOUNT_OF_NODES];

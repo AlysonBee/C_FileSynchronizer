@@ -47,6 +47,7 @@ t_ft	*inspect_directory(t_ft *head_node, char *directory_name)
 		return head_node;
 	while ((directory = readdir(dp)))
 	{
+        printf("direc: %s\n", directory->d_name);
 		if (directory->d_name[0] == '.')
 			continue ;
 		 full_path_name = generate_path(directory_name,

@@ -11,14 +11,18 @@ int		accept_loop(int *sockfd, struct sockaddr_in socket_address)
 	address_length = sizeof(socket_address);
 	while (true)
 	{
+        printf("accepting..\n");
 		accept_socket = accept(*sockfd, (struct sockaddr *)&socket_address,
 			&address_length);
+        
+       
 		if (accept_socket)
 		{
 			printf("accepted\n");
 			return (accept_socket) ;
 		}
 	}
+    printf("rejected\n");
 	return (-1);
 }
 

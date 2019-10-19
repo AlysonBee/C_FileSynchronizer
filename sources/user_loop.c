@@ -9,6 +9,7 @@ static void         monitoring(int parent_socket, int accept_socket)
 {
     int socket_checker;
 
+    printf("BRING IT!\n");
     daemon_operation(accept_socket);
     /*
     while (true)
@@ -30,11 +31,11 @@ int         test_flag(void)
     bzero(buffer, 2);
     read(fd, buffer, 2);
     int number = atoi(buffer);
+    printf("number is %d\n", number);
     if (number == 1)
         return (4243);
     else
         return (4244);
-    clos(fd);
 }
 // END DEBUG
 static void  *make_daemon_socket(void *vargs)
@@ -45,9 +46,9 @@ static void  *make_daemon_socket(void *vargs)
     int                 parent_socket;
 
     parent_socket = *((int *)vargs);
-    free(vargs);
     printf("prime_sockt is %d\n", parent_socket);
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    printf("sockfd is %d\n", sockfd);
     if (sockfd < 0)
     {
         perror("Error making daemon listening process\n");
@@ -58,13 +59,21 @@ static void  *make_daemon_socket(void *vargs)
     socket_address.sin_addr.s_addr = INADDR_ANY;
     //socket_address.sin_port = htons(4243);
     socket_address.sin_port = htons(test_flag());
-    bind(sockfd, (struct sockaddr *)&socket_address, sizeof(socket_address));
+    if (bind(sockfd, (struct sockaddr *)&socket_address, sizeof(socket_address)) < 0)
+    {
+        printf("perror bind\n");
+    }
+    if (listen(sockfd, 5) < 0)
+    {
+        perror("linsten error\n");
 
-    listen(sockfd, 5);
-
+    }
+    printf("before acecpt\n");
+    printf("socket is %d\n", sockfd);
     accept_socket = accept_loop(&sockfd, socket_address);
 
-    socket_monitor(parent_socket, accept_socket);
+    printf("accepting stuff\n");
+    monitoring(parent_socket, accept_socket);
 }
 
 void    *connect_daemon(void *vargs)
@@ -72,6 +81,7 @@ void    *connect_daemon(void *vargs)
     int                 sockfd;
     struct sockaddr_in  socket_address;
 
+    printf("connect_daemon () \n");
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
     {
@@ -83,10 +93,13 @@ void    *connect_daemon(void *vargs)
     socket_address.sin_addr.s_addr = inet_addr("127.0.0.1");
     //socket_address.sin_port = htons(4243);
     socket_address.sin_port = htons(test_flag());
+    printf("port is %d\n", socket_address.sin_port);
     sleep(2);
-    connect(sockfd, (struct sockaddr *)&socket_address, sizeof(socket_address));
-
-
+    if (connect(sockfd, (struct sockaddr *)&socket_address, sizeof(socket_address)) < 0)
+    {
+        perror("connect\n");
+    } 
+    sleep(30);
 }
 
 void       user_loop(int sockfd, struct sockaddr_in socket_address)
@@ -99,6 +112,6 @@ void       user_loop(int sockfd, struct sockaddr_in socket_address)
     *thread_socket = sockfd;
     pthread_create(&thread_id, NULL, make_daemon_socket, thread_socket);
     pthread_create(&thread_id, NULL, connect_daemon, NULL);
-        
+    pthread_join(thread_id, NULL); 
     printf("daemon connected\n");
 }

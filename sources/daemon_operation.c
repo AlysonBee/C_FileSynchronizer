@@ -13,7 +13,7 @@ t_file_list   *tf_to_file_list(t_ft *file_meta)
     {
         head = create_and_add_file_list_node(
             head,
-            file_meta->filename,
+            travel->filename,
             extract_file_size(travel->filename),
             extract_file_timestamp(travel->filename),
             extract_file_content(travel->filename) 
@@ -54,16 +54,18 @@ t_file_list  *differences(t_ft *starting_list, t_ft *current_list)
 
     current_travel_list = current_list;
     travel_list = starting_list;
-    while (travel_list)
+    while (travel_list && current_travel_list)
     {
         new_file = files_are_unchanged(travel_list, current_travel_list);
         if (new_file != NULL)
             break;
         travel_list = travel_list->next;
+        if (current_travel_list == NULL)
+            break ;
         current_travel_list = current_travel_list->next;
     }
-    if (current_travel_list->next != NULL)
-        return (tf_to_file_list(current_travel_list->next));
+    if (current_travel_list)
+        return (tf_to_file_list(current_travel_list));
     return (new_file);
 }
 
@@ -124,17 +126,17 @@ void        daemon_operation(int sockfd)
             current_list
         );
         if (node_to_replace == NULL)
+      
            free_file_timestamp(current_list);
         else
         {
             send_updated_file(node_to_replace, sockfd);
         }
-
          break ;
    }
     if (node_to_replace == NULL)
         printf("NULL\n");
-   
+    printf("Phere\n");
 }
 
 
