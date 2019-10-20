@@ -31,10 +31,6 @@ t_file_list    *files_are_unchanged(t_ft *starting_list,
     new_node = NULL;
     if (strcmp(starting_list->filename, current_list->filename) == 0)
     {
-        if (starting_list->timestamp != current_list->timestamp)
-        {
-            printf("NOT EQUAL : %s\n", starting_list->filename);
-        }
         if (starting_list->timestamp < current_list->timestamp)
         {
             new_node = new_file_list_node(
@@ -79,8 +75,6 @@ t_file_list  *differences(t_ft *starting_list, t_ft *current_list)
         if (new_file != NULL)
             break;
         travel_list = travel_list->next;
-      //  if (current_travel_list == NULL)
-        //    break ;
         current_travel_list = current_travel_list->next;
     }
     if (current_travel_list && new_file == NULL)
@@ -94,7 +88,6 @@ void        send_buffer_size(uint64_t file_size, int sockfd)
 
     buffer = (unsigned char*)itoa(file_size);
     send(sockfd, buffer, strlen((char *)buffer) + 1, 0);
-    printf("file size sent\n");
 }
 
 void        send_updated_file(t_file_list *node_to_send, int sockfd)
@@ -125,15 +118,11 @@ void        send_updated_file(t_file_list *node_to_send, int sockfd)
 	buffer_to_send = serialize_transmission_buffer(transmission_buffer_template);
 	local_buffer_size = total_file_size(buffer_to_send);
 
-    printf("file list update:\n");
     print_file_list(node_to_send);
     send_buffer_size(local_buffer_size, sockfd);
-    printf("Info needs to be sent\n");
     DEBUG_BUFFER(buffer_to_send, local_buffer_size);
     sleep(1);
     send(sockfd, buffer_to_send, local_buffer_size, 0); 
-//	controlled_send(sockfd, buffer_to_send, local_buffer_size);
-    printf("SENT\n"); 
 }
 
 void        daemon_operation(int sockfd)
@@ -179,9 +168,6 @@ void        daemon_operation(int sockfd)
             free_file_list_node(node_to_replace);
         }
     }
-    if (node_to_replace == NULL)
-        printf("NULL\n");
-    printf("Phere\n");
 }
 
 

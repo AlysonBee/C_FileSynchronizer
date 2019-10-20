@@ -4,33 +4,11 @@
 #include "../includes/file_sync.h"
 #include <pthread.h>
 
-void                overwrite_or_create_local_version(int accept_socket)
-{
-    unsigned char   incoming_file_size[4096];
-    uint64_t        file_size;
-    unsigned char   *remote_filesys;
-
-    bzero(incoming_file_size, 4096);
-    recv(accept_socket, incoming_file_size, 4096, 0);
-    file_size = (uint64_t)atoi((char *)incoming_file_size);
-    remote_filesys = (unsigned char *)malloc(sizeof(unsigned char) *
-        file_size * 2);
-    
-    controlled_recv(accept_socket, remote_filesys, file_size);
- //   recv(accept_socket, remote_filesys, file_size, 0);
-
-    printf("recvied content is ====\n");
-    DEBUG_BUFFER(remote_filesys, file_size);
-    printf("============================\n");
-}
-
 
 static void         monitoring(int parent_socket, int accept_socket)
 {
     int socket_checker;
 
- //   printf("BRING IT!\n");
-   // daemon_operation(accept_socket);
  
     while (true)
     {
@@ -40,11 +18,6 @@ static void         monitoring(int parent_socket, int accept_socket)
         {
             printf("Connector is saving their work\n");
             daemon_recv_process(parent_socket);
-        //    overwrite_or_create_local_version(accept_socket);
-        }
-        else if (socket_checker == accept_socket)
-        {
-            printf("coverwirte local version\n");
         }
    }
 }
@@ -69,6 +42,7 @@ int         test_flag(void)
     }
 }
 // END DEBUG
+
 static void  *make_daemon_socket(void *vargs)
 {
     int                 sockfd;
@@ -77,9 +51,7 @@ static void  *make_daemon_socket(void *vargs)
     int                 parent_socket;
 
     parent_socket = *((int *)vargs);
-    printf("prime_sockt is %d\n", parent_socket);
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    printf("sockfd is %d\n", sockfd);
     if (sockfd < 0)
     {
         perror("Error making daemon listening process\n");
@@ -97,13 +69,9 @@ static void  *make_daemon_socket(void *vargs)
     if (listen(sockfd, 5) < 0)
     {
         perror("linsten error\n");
-
     }
-    printf("before acecpt\n");
-    printf("socket is %d\n", sockfd);
     accept_socket = accept_loop(&sockfd, socket_address);
 
-    printf("accepting stuff\n");
     monitoring(parent_socket, accept_socket);
 }
 
@@ -113,8 +81,6 @@ void    *connect_daemon(void *vargs)
     struct sockaddr_in  socket_address;
     int parent_socket = *((int *)vargs);
 
-    printf("connect_daemon () \n");
-   
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd < 0)
     {
@@ -132,8 +98,8 @@ void    *connect_daemon(void *vargs)
     {
         perror("connect\n");
     }
+
     daemon_operation(parent_socket);
-    sleep(30);
 }
 
 void       user_loop(int sockfd, struct sockaddr_in socket_address)
