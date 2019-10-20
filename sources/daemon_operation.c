@@ -31,6 +31,10 @@ t_file_list    *files_are_unchanged(t_ft *starting_list,
     new_node = NULL;
     if (strcmp(starting_list->filename, current_list->filename) == 0)
     {
+        if (starting_list->timestamp != current_list->timestamp)
+        {
+            printf("NOT EQUAL : %s\n", starting_list->filename);
+        }
         if (starting_list->timestamp < current_list->timestamp)
         {
             new_node = new_file_list_node(
@@ -44,6 +48,21 @@ t_file_list    *files_are_unchanged(t_ft *starting_list,
     return (new_node);
 }
 
+
+int         length_tf(t_ft *listing)
+{
+    int     i;
+    t_ft    *trav;
+
+    trav = listing;
+    i = 0;
+    while (trav)
+    {
+        i++;
+        trav = trav->next;
+    }
+    return (i); 
+}
 
 t_file_list  *differences(t_ft *starting_list, t_ft *current_list)
 {
@@ -60,13 +79,22 @@ t_file_list  *differences(t_ft *starting_list, t_ft *current_list)
         if (new_file != NULL)
             break;
         travel_list = travel_list->next;
-        if (current_travel_list == NULL)
-            break ;
+      //  if (current_travel_list == NULL)
+        //    break ;
         current_travel_list = current_travel_list->next;
     }
-    if (current_travel_list)
+    if (current_travel_list && new_file == NULL)
         return (tf_to_file_list(current_travel_list));
     return (new_file);
+}
+
+void        send_buffer_size(uint64_t file_size, int sockfd)
+{
+    unsigned char       *buffer;
+
+    buffer = (unsigned char*)itoa(file_size);
+    send(sockfd, buffer, strlen((char *)buffer) + 1, 0);
+    printf("file size sent\n");
 }
 
 void        send_updated_file(t_file_list *node_to_send, int sockfd)
@@ -97,10 +125,15 @@ void        send_updated_file(t_file_list *node_to_send, int sockfd)
 	buffer_to_send = serialize_transmission_buffer(transmission_buffer_template);
 	local_buffer_size = total_file_size(buffer_to_send);
 
-    /*
-	sleep(5);
-	controlled_send(sockfd, buffer_to_send, local_buffer_size);
-    */
+    printf("file list update:\n");
+    print_file_list(node_to_send);
+    send_buffer_size(local_buffer_size, sockfd);
+    printf("Info needs to be sent\n");
+    DEBUG_BUFFER(buffer_to_send, local_buffer_size);
+    sleep(1);
+    send(sockfd, buffer_to_send, local_buffer_size, 0); 
+//	controlled_send(sockfd, buffer_to_send, local_buffer_size);
+    printf("SENT\n"); 
 }
 
 void        daemon_operation(int sockfd)
@@ -126,14 +159,26 @@ void        daemon_operation(int sockfd)
             current_list
         );
         if (node_to_replace == NULL)
-      
-           free_file_timestamp(current_list);
+        {
+            free_file_timestamp(current_list);
+            current_list = NULL;
+            node_to_replace = NULL;
+        }
         else
         {
+            printf("REPLACEING \n");
             send_updated_file(node_to_replace, sockfd);
+            free_file_timestamp(starting_file_list);
+            free_file_timestamp(current_list);
+            starting_file_list = NULL;
+            current_list = NULL;
+            starting_file_list = inspect_directory(
+                starting_file_list,
+                "."
+            );
+            free_file_list_node(node_to_replace);
         }
-         break ;
-   }
+    }
     if (node_to_replace == NULL)
         printf("NULL\n");
     printf("Phere\n");

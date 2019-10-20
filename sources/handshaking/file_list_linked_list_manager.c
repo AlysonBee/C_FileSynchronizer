@@ -50,6 +50,20 @@ t_file_list 	*add_file_list_node(t_file_list *head,
 	return (traverse);
 }
 
+void            free_file_list_node(t_file_list *head)
+{
+    t_file_list *trav;
+
+    while (head)
+    {
+        trav = head;
+        head = head->next;
+        free(trav->filename);
+        free(trav->file_content);
+        free(trav);
+    }
+}
+
 t_file_list		*create_and_add_file_list_node(t_file_list *head,
 	char *filename,
 	uint64_t filesize,

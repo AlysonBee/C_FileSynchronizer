@@ -26,7 +26,7 @@ static int      check_for_active_socket(fd_set socket_pool,
     return (-1);
 }
 
-int    socket_monitor(int remote_conn_socket, int daemon_socket)
+int    socket_monitoring(int remote_conn_socket, int daemon_socket)
 {
     fd_set          socket_pool;
     int             maxfd;
@@ -38,8 +38,10 @@ int    socket_monitor(int remote_conn_socket, int daemon_socket)
 
     seconds.tv_sec = 1;
     seconds.tv_usec = 1;
+    printf("before select\n");
     checker = select(maxfd, &socket_pool, NULL, NULL, NULL);
-
+    printf("checker is %d\n", checker);
+    printf("afte rselect\n");
     return (check_for_active_socket(socket_pool,
                 remote_conn_socket, daemon_socket)); 
 }

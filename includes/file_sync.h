@@ -144,8 +144,13 @@ void    free_file_timestamp(t_ft *head_node);
 
 void        daemon_operation(int sockfd);
 
+/* receive_daemon_operation.c */
+
+void        daemon_recv_process(int sockfd);
+
 /* handshake/file_list_linked_list_manager */
 
+void            free_file_list_node(t_file_list *head);
 t_file_list		*create_and_add_file_list_node(t_file_list *head,
 	char *filename,
 	uint64_t filesize,

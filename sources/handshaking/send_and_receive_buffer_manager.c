@@ -43,6 +43,8 @@ void			controlled_recv(int sockfd, unsigned char *buffer,
 			break;
 		}
 	}
+    printf("====================\n");
+    DEBUG_BUFFER(buffer, 200);
 }
 
 
