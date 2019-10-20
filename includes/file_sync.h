@@ -131,7 +131,7 @@ void       user_loop(int sockfd, struct sockaddr_in socket_address);
 
 /* user_loop_socket_monitor.c */
 
-int    socket_monitor(int remote_conn_socket, int daemon_socket);
+int    socket_monitoring(int remote_conn_socket, int daemon_socket);
 
 /* file_and_timestamp_linked_list_manager.c */
 
