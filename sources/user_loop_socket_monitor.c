@@ -5,7 +5,7 @@
 #include <sys/select.h>
 
 static int     set_file_descriptors(fd_set *socket_pool, int remote_conn_socket,
-    daemon_socket)
+    int daemon_socket)
 {
     int     maxfd;
 
