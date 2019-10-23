@@ -18,27 +18,6 @@ static bool		check_folder_path_exists(char *directory_name)
 
 
 
-static void		create_subdirectory(uint64_t index,
-	t_file_list *full_filename)
-{
-	int		counter;
-	char	*directory;
-	int		slash_index;
-
-	counter = index;
-	while (counter)
-	{
-		if (full_filename->filename[counter] == '/')
-		{
-			directory = sub(full_filename->filename, 0, counter);
-		//	mkdir(directory, 0755);
-			printf("Making directory : %s\n", directory);
-			free(directory);
-		}
-		counter++;
-	}
-	
-}
 
 static void		directory_path_management(t_file_list *file_info)
 {
@@ -79,7 +58,7 @@ static void		overwrite_older_file_version(t_file_list *file_to_change)
 		directory_path_management(file_to_change);
 	}
 	printf("CREATING FILE : %s\n", file_to_change->filename);
-//	write_file_content(file_to_change);
+	write_file_content(file_to_change);
 }
 
 void			resolve_file_conflicts(unsigned char *remote_file_system)
@@ -111,7 +90,7 @@ void			resolve_file_conflicts(unsigned char *remote_file_system)
 				if (local_timestamp > traverse_list->timestamp)
 				{
 					printf("OVERWRITE THIS VERSION\n");
-					//overwrite_older_file_version(traverse_list);
+					overwrite_older_file_version(traverse_list);
 				}
 			}
 		}

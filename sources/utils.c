@@ -1,5 +1,5 @@
 
-
+#include <sys/mman.h>
 #include "../includes/file_sync.h"
 
 void	print_file_list(t_file_list *head)
@@ -75,6 +75,38 @@ void	DEBUG_BUFFER(unsigned char *buffer_start, uint64_t byte_count)
 		i++;
 	}
 	printf("\n");
+}
+
+bool    diff_detector(char *filename1, char *filename2)
+{
+    size_t          sizes;
+    size_t          size1;
+    size_t          size2;
+    unsigned char   *file1_content;
+    unsigned char   *file2_content;
+    bool            flag;
+
+    map_file(&file1_content, &size1, filename1);
+    map_file(&file2_content, &size2, filename2);
+    if (size1 != size2)
+    {
+        munmap(file1_content, size1);
+        munmap(file2_content, size2);
+        return (false);
+    }
+    sizes = 0;
+    while (sizes < size1)
+    {
+        if (filename1[sizes] != filename2[sizes])
+        {
+            flag = false;
+            break;
+        }
+        sizes++;
+    }
+    munmap(file1_content, size1);
+    munmap(file2_content, size2);
+    return (true);
 }
 
 char	*parse_command_line_flags(int argc, char **argv)

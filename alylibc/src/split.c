@@ -34,7 +34,7 @@ char		**split(char *str, char delim)
 	while (str[++i])
 		if (str[i] == delim)
 		{
-			if (ft_strlen(s) == 0)
+			if (strlen(s) == 0)
 				continue ;
 			else
 				array = arraypush_and_null(array, &s);

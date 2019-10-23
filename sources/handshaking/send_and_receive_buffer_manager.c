@@ -95,7 +95,6 @@ unsigned char		*send_and_receive_manager(int sockfd, int client_type,
 {
 	unsigned char	*buffer_to_send;
 	int64_t			size;
-	unsigned char	*received_buffer;
 	unsigned char	*remote_filesystem;
 	int64_t			local_buffer_size;
 	unsigned char	*head_ptr;

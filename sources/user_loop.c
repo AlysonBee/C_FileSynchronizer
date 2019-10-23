@@ -24,13 +24,13 @@ static void         monitoring(int parent_socket, int accept_socket)
 // DEBUG
 int         test_flag(void)
 {
-    int fd = open("client_test.txt", O_RDONLY);
+    int fd = open(".test_client.txt", O_RDONLY);
     char buffer[2];
     bzero(buffer, 2);
     read(fd, buffer, 2);
     int number = atoi(buffer);
     printf("number is %d\n", number);
-    if (number == 0)
+    if (number == 1)
     {
         printf("4243");
         return (4243);
@@ -73,6 +73,7 @@ static void  *make_daemon_socket(void *vargs)
     accept_socket = accept_loop(&sockfd, socket_address);
 
     monitoring(parent_socket, accept_socket);
+    return (NULL);
 }
 
 void    *connect_daemon(void *vargs)
@@ -99,7 +100,8 @@ void    *connect_daemon(void *vargs)
         perror("connect\n");
     }
 
-    daemon_operation(parent_socket);
+    daemon_process(parent_socket);
+    return (NULL);
 }
 
 void       user_loop(int sockfd, struct sockaddr_in socket_address)

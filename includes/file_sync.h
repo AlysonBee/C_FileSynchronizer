@@ -112,6 +112,7 @@ void	print_file_list(t_file_list *head);
 void	DEBUG_BUFFER_TO_FILE(unsigned char *buffer_start, uint64_t byte_count,
 	char *filename);
 uint64_t	total_file_size(unsigned char *buffer);
+bool    diff_detector(char *filename1, char *filename2);
 
 /* server.c */
 
@@ -143,6 +144,10 @@ void    free_file_timestamp(t_ft *head_node);
 /* daemon_operation.c */
 
 void        daemon_operation(int sockfd);
+
+/* daemon_process.c */
+
+void        daemon_process(int sockfd);
 
 /* receive_daemon_operation.c */
 
@@ -207,6 +212,7 @@ uint64_t		send_incoming_buffer_size(int sockfd, unsigned char *buffer,
 /* handshake/directory_linked_list_manager.c */
 
 t_dir			*create_and_add_directory(t_dir *head, char *directory_name);
+void        free_directory_list(t_dir *directory_list);
 
 /* handshake/resolve_file_conflicts.c */
 

@@ -7,7 +7,7 @@
 **  Code for daemonizing a process.
 */
 
-static void	daemonize_process(void)
+void	daemonize_process(void)
 {
 	pid_t	pid;
 	pid_t	sid;

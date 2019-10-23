@@ -106,7 +106,7 @@ void	handshake(int sockfd, int client_type)
 	remote_filesystem = send_and_receive_manager(sockfd, client_type,
 		transmission_buffer_template);
 
-	//resolve_file_conflicts(remote_filesystem);
+	resolve_file_conflicts(remote_filesystem);
 
 	return ;
 }

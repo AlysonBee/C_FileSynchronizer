@@ -2,6 +2,19 @@
 
 #include "../../includes/file_sync.h"
 
+void        free_directory_list(t_dir *directory_list)
+{
+    t_dir   *traverse;
+
+    while (directory_list)
+    {
+        traverse = directory_list;
+        directory_list = directory_list->next;
+        free(traverse->directory_name);
+        free(traverse);
+    }
+}
+
 t_dir		*new_directory(char *directory_name)
 {
 	t_dir	*head;

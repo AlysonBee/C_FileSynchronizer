@@ -59,7 +59,6 @@ static t_file_list		*extract_file_information(char *target_file,
 	time_t			file_timestamp;
 	unsigned char	*file_content;
 	uint64_t		file_size;
-	uint64_t		total_file_size_sub;
 	
 	file_timestamp = extract_file_timestamp(target_file);
 	file_content = extract_file_content(target_file);
@@ -128,11 +127,6 @@ t_file_list	*all_files_on_this_client(char *current_directory,
 				directory_list,
 				full_file_path
 			);
-			/*
-			return all_files_on_this_client(
-				full_file_path,
-				file_list
-			); */
 		}
 		else		
 			file_list = extract_file_information(
@@ -148,8 +142,6 @@ t_file_list	*all_files_on_this_client(char *current_directory,
 t_file_list	 *gather_all_file_info(void)
 {
 	t_file_list 	*file_list;
-	uint64_t		total_file_sizes;
-	int32_t			number_of_files;
 
 	file_list = NULL;	
 	file_list = all_files_on_this_client(
