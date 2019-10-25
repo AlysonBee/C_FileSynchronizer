@@ -4,6 +4,8 @@
 # include <string.h>
 # include <stdlib.h>
 
+
+char		*uitoa(unsigned long long value);
 void	map_file(unsigned char **content, size_t *size, char *filename);
 char	*ft_strchr(const char *s, int c);
 char	*ft_strstr(const char *big, const char *little);

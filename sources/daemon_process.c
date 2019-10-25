@@ -1,13 +1,13 @@
 
 
 #include "../includes/file_sync.h"
-#include "daemon_process.h"
+#include "../includes/daemon_process.h"
 #include <errno.h>
 
 t_lst       *HASH[HASH_SIZE];
 void        create_directory_list();
 char        root_directory[4096];
-
+#define DEL_MESSAGE_SIZE 3
 
 
 t_dir       *directory_list(char *, t_dir *);
@@ -142,7 +142,7 @@ void        send_updated_file(t_file_list *node_to_send, int sockfd)
     send(sockfd, buffer_to_send, local_buffer_size, 0);
     free(buffer_to_send);
     free(transmission_buffer_template);
-    sleep(1);
+    sleep(3);
 }
 
 bool        check_last_word(char *line, char *last_word)
@@ -154,7 +154,6 @@ bool        check_last_word(char *line, char *last_word)
     {
         segments = split(line, '/');
         index = arraylen(segments);
-        printf("segments[inex - 1] %s\n", segments[index - 1]);
         if (strncmp(segments[index - 1], last_word, 4) == 0)
         {
             free2d(segments);
@@ -169,15 +168,110 @@ bool        check_last_word(char *line, char *last_word)
     return (false);
 }
 
+char        *serialize_deletion(char *file_to_check)
+{
+    unsigned char *buffer;
+
+    buffer = (unsigned char *)malloc(sizeof(unsigned char) *
+        strlen((char *)file_to_check) + 1 + DEL_MESSAGE_SIZE);
+    memcpy(buffer, "del:", 4);
+    memcpy(&buffer[4], file_to_check, strlen((char *)file_to_check) + 1);
+    printf("buffer is %s\n", buffer);
+    return ((char *)buffer);
+}
+
+bool         skipping_hidden_files(char *content)
+{
+    char    **file_segments;
+    int32_t counter;
+    bool    flag;
+
+    flag = false;
+    printf("skipping hidden files : first split\n");
+    file_segments = split(content, '/');
+    if (!file_segments)
+        return false;
+    counter = 0;
+    printf("looping\n");
+    while (file_segments[counter])
+        counter++;
+    counter--;
+    printf("first access\n");
+    if (file_segments[counter][0] == '.')
+       flag = true;
+    printf("freeing\n");
+    free2d(file_segments);
+    return (flag);
+}
+
 char        *checking_access(char *content, size_t root_length)
 {
-    char    *file_to_check;
+    char        *file_to_check;
+    char        *deletion;
 
     file_to_check = &content[root_length + 1];
-    printf("%s\n", file_to_check);
-    if (access(file_to_check, F_OK) != -1)
-    {
+    if (skipping_hidden_files(file_to_check))
+        return (NULL);
+    printf("after skipping hidden files\n");
+
+    // if the file is a file and NOT a folder and it exists.
+    if (access(file_to_check, F_OK) != -1 && !check_folder_path_exists(file_to_check))
         return (strdup(file_to_check));
+
+    // if the file is a folder.
+    if (check_folder_path_exists(file_to_check))
+    {
+        return (NULL);
+    }
+    printf("Removing file\n");
+    printf("File remove : %s\n", file_to_check);
+    // else it's being deleted.
+    deletion = serialize_deletion(file_to_check);
+    if (deletion)
+    {
+        return (deletion);
+    }
+    return (NULL);
+}
+
+char        *vim_support(char **directory_list, int root_length)
+{
+    char    *edited_file;
+    int32_t counter;
+
+    counter = 0;
+    edited_file = NULL;
+    while (directory_list[counter])
+    {
+        if (check_last_word(&directory_list[counter][root_length + 1], "4913") == true)
+        {
+            edited_file = strdup(&directory_list[counter + 1][root_length + 1]);
+            break ;
+        }
+        counter++;
+    }
+    return (edited_file);
+}
+
+char        *basic_file_creation(char **directory_list, int root_length)
+{
+    int32_t i;
+    char    *edited_file;
+
+    i = 0;
+    while (directory_list[i])
+    {
+        printf("first \n");
+        printf("%s\n",directory_list[i]);
+        edited_file = checking_access(directory_list[i], root_length);
+
+        if (edited_file)
+        {
+            printf("EDITED FILE : %s\n", edited_file);
+            free2d(directory_list);
+            return (edited_file);
+        }
+        i++;
     }
     return (NULL);
 }
@@ -189,25 +283,21 @@ char        *check_for_changed_state(char *content)
     char    *edited_file;
     size_t  root_length;
 
+    edited_file = NULL;
     root_length = strlen(root_directory);
     directory_list = split(content, '\n');
-    if (arraylen(directory_list) == 1)
-        return (checking_access(directory_list[0], root_length));
-    counter = 0;
-    edited_file = NULL;
-    while (directory_list[counter])
-    {
-       // if (strncmp(&directory_list[counter][root_length + 1], "4913", 4) == 0)
-        if (check_last_word(&directory_list[counter][root_length + 1], "4913") == true)
-        {
-            edited_file = strdup(&directory_list[counter + 1][root_length + 1]);
-            break ;
-        }
-        counter++;
-    }
-    if (edited_file == NULL)
-        printf("NULL\n");
-    free2d(directory_list);
+
+    printf("VIM SUPPORT\n");
+    edited_file = vim_support(directory_list, root_length);
+    if (edited_file)
+        return (edited_file);
+
+    printf("BASIC FILE SUPPORT\n");
+    edited_file = basic_file_creation(directory_list, root_length);
+    if (edited_file)
+        return (edited_file);
+
+
     return (edited_file);
 }
 
@@ -226,7 +316,17 @@ char        *fswatch_systemcall(void)
     bzero(buffer, info.st_size + 1);
     read(fd, buffer, info.st_size);
     printf("Buffer is %s\n", buffer);
+    close(fd);
+    
+    printf("FIRST POINT\n");
+    if (check_folder_path_exists(buffer))
+    {
+        free(buffer);
+        return (NULL);
+    }
+    printf("SECOND POINT\n");
     changed_file = check_for_changed_state(buffer);
+    free(buffer);
     if (changed_file == NULL)
         return NULL;
     return (changed_file);
@@ -261,16 +361,31 @@ void        daemon_process(int sockfd)
     printf("here\n");
     create_directory_list();
     char    *file;
-
+    extern char *g_coordinate;
 
     printf("here\n");
     while (true)
     {
         printf("again\n");
+        if (g_coordinate != NULL)
+        {
+            free(g_coordinate);
+            g_coordinate = NULL;
+            printf("GG is NULL\n");
+            sleep(1);
+            continue ;
+        }
         file = fswatch_systemcall();
+
         if (file)
         {
-           send_updated_file(send_file(file), sockfd);
+           if (strncmp(file, "del:", 4) == 0)
+           {
+               send(sockfd, (unsigned char *)file, strlen((char *)file) + 1, 0);
+                printf("Deleting remote file %s\n", &file[4]);
+           }
+           else
+                send_updated_file(send_file(file), sockfd);
            free(file);
         }
     }

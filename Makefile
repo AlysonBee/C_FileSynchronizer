@@ -26,9 +26,9 @@ handshake_list = handshake.c \
 
 source_list = main.c initialize_daemon.c utils.c server.c client.c \
 	user_loop.c user_loop_socket_monitor.c \
-	file_and_timestamp_linked_list_manager.c inspect_directory.c \
-	receive_daemon_operation.c daemon_process.c uitoa.c \
-	hash.c shasumfile.c
+	file_and_timestamp_linked_list_manager.c  \
+	receive_daemon_operation.c daemon_process.c\
+	hash.c shasumfile.c receive_handler.c
 
 flags = -Wall -Wextra -pedantic -pedantic-errors
 

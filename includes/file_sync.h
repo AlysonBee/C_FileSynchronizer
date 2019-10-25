@@ -141,9 +141,17 @@ t_ft	*create_and_add_file_timestamp(t_ft *head_node,
 t_ft	*inspect_directory(t_ft *head_node, char *directory_name);
 void    free_file_timestamp(t_ft *head_node);
 
+/* initialize_daemon.c */
+
+void	daemonize_process(void);
+
 /* daemon_operation.c */
 
 void        daemon_operation(int sockfd);
+
+/* create_folder_or_delete.c */
+
+void        receive_handler(unsigned char *buffer);
 
 /* daemon_process.c */
 
@@ -217,5 +225,8 @@ void        free_directory_list(t_dir *directory_list);
 /* handshake/resolve_file_conflicts.c */
 
 void			resolve_file_conflicts(unsigned char *remote_file_system);
+void		    overwrite_older_file_version(t_file_list *file_to_change);
+bool		check_folder_path_exists(char *directory_name);
+void		directory_path_management(t_file_list *file_info);
 
 #endif

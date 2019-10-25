@@ -57,6 +57,8 @@ static void  *make_daemon_socket(void *vargs)
         perror("Error making daemon listening process\n");
         exit(1);
     }
+    int enable = 1;
+    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
     memset(&socket_address, '\0', sizeof(socket_address));
     socket_address.sin_family = AF_INET;
     socket_address.sin_addr.s_addr = INADDR_ANY;
@@ -88,6 +90,11 @@ void    *connect_daemon(void *vargs)
         perror("Error initializing daemon.\n");
         exit(1);
     }
+    int enable = 1;
+    if (setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &enable, sizeof(int)) < 0)
+    {
+        perror("setsockopt");
+    } 
     memset(&socket_address, '\0', sizeof(socket_address));
     socket_address.sin_family = AF_INET;
     socket_address.sin_addr.s_addr = inet_addr("127.0.0.1");
@@ -108,7 +115,7 @@ void       user_loop(int sockfd, struct sockaddr_in socket_address)
 {
     pthread_t    thread_id;
     int          *thread_socket; 
-
+   
     thread_socket = malloc(sizeof(*thread_socket));
     // Daemon 
     *thread_socket = sockfd;

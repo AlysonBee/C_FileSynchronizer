@@ -3,7 +3,7 @@
 
 #include "../../includes/file_sync.h"
 
-static bool		check_folder_path_exists(char *directory_name)
+bool		check_folder_path_exists(char *directory_name)
 {
 	DIR		*dp;
 
@@ -17,9 +17,7 @@ static bool		check_folder_path_exists(char *directory_name)
 }
 
 
-
-
-static void		directory_path_management(t_file_list *file_info)
+void		directory_path_management(t_file_list *file_info)
 {
 	char		*directory_name;
 	uint64_t	counter;
@@ -51,7 +49,7 @@ void			write_file_content(t_file_list *file_to_change)
 	close(fd);
 }
 
-static void		overwrite_older_file_version(t_file_list *file_to_change)
+void		    overwrite_older_file_version(t_file_list *file_to_change)
 {	
 	if (strchr(file_to_change->filename, '/'))
 	{
