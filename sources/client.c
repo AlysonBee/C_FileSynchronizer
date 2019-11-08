@@ -7,7 +7,7 @@ void	client_loop(int sockfd, struct sockaddr_in socket_address)
 {
 	handshake(sockfd, CLIENT);
 
-    user_loop(sockfd, socket_address);
+//    user_loop(sockfd, socket_address);
 	return ;
 }
 

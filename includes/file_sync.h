@@ -20,6 +20,7 @@
 
 #include "handshake.h"
 #include "../alylibc/inc/lib.h"
+#include "../libft/libft.h"
 
 #define MAGIC_NUMBER_SIZE 5
 #define BITSHIFTING_MULTIPLIER 8
@@ -160,6 +161,10 @@ void        daemon_process(int sockfd);
 /* receive_daemon_operation.c */
 
 void        daemon_recv_process(int sockfd);
+
+/* receive_handler.c */
+
+int remove_directory(const char *path);
 
 /* handshake/file_list_linked_list_manager */
 
