@@ -27,7 +27,6 @@ handshake_list = handshake.c \
 source_list = main.c initialize_daemon.c utils.c server.c client.c \
 	user_loop_socket_monitor.c \
 	file_and_timestamp_linked_list_manager.c  \
-	receive_daemon_operation.c daemon_process.c\
 	hash.c shasumfile.c receive_handler.c
 
 flags = -Wall -Wextra -pedantic -pedantic-errors
@@ -60,10 +59,9 @@ dependencies:
 
 all:
 	echo $(UNAME_S)
-	make all -C libft/
 	make all -C $(alylibc)
 	gcc -c $(flags) $(sources) $(handshakes)
-	gcc -o $(executable) $(objects_list) $(handshake_objects_list) $(alylibc_archive) $(links) libft/libft.a
+	gcc -o $(executable) $(objects_list) $(handshake_objects_list) $(alylibc_archive) $(links)
 	mv $(objects_list) $(handshake_objects_list) $(objects_directory)
 
 clean:

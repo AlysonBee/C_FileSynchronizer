@@ -74,7 +74,6 @@ static void  *make_daemon_socket(void *vargs)
     }
     accept_socket = accept_loop(&sockfd, socket_address);
 
-    monitoring(parent_socket, accept_socket);
     return (NULL);
 }
 
@@ -107,7 +106,6 @@ void    *connect_daemon(void *vargs)
         perror("connect\n");
     }
 
-    daemon_process(parent_socket);
     return (NULL);
 }
 
@@ -115,7 +113,7 @@ void       user_loop(int sockfd, struct sockaddr_in socket_address)
 {
     pthread_t    thread_id;
     int          *thread_socket; 
-   
+    // TODO: Create daemon process for handling file monitoring and updating. 
     thread_socket = malloc(sizeof(*thread_socket));
     // Daemon 
     *thread_socket = sockfd;

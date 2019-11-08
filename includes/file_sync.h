@@ -20,7 +20,6 @@
 
 #include "handshake.h"
 #include "../alylibc/inc/lib.h"
-#include "../libft/libft.h"
 
 #define MAGIC_NUMBER_SIZE 5
 #define BITSHIFTING_MULTIPLIER 8
