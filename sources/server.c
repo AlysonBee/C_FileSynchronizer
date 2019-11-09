@@ -33,8 +33,9 @@ static void 	server_loop(int sockfd,
 
 	accept_socket = accept_loop(&sockfd, socket_address);
 	
-	handshake(accept_socket, SERVER);
-
+//	handshake(accept_socket, SERVER);
+    
+    sync_loop(sockfd, SERVER, socket_address);
 
     //printf("Server spinning a daemon...\n");
     //user_loop(accept_socket, socket_address);

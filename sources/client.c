@@ -5,9 +5,9 @@
 
 void	client_loop(int sockfd, struct sockaddr_in socket_address)
 {
-	handshake(sockfd, CLIENT);
+//	handshake(sockfd, CLIENT);
 
-//    user_loop(sockfd, socket_address);
+    sync_loop(sockfd, CLIENT, socket_address);
 	return ;
 }
 

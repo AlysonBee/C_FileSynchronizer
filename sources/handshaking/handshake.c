@@ -83,7 +83,7 @@ static bool				identify_connection(int sockfd, int client_type)
 	return (true);
 }
 
-void	handshake(int sockfd, int client_type)
+unsigned char	        *handshake(int sockfd, int client_type)
 {
 	t_file_list			*file_list;
 	uint64_t			total_file_size;
@@ -108,6 +108,6 @@ void	handshake(int sockfd, int client_type)
 
 	resolve_file_conflicts(remote_filesystem);
 
-	return ;
+	return remote_filesystem;
 }
 

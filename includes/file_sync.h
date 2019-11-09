@@ -29,12 +29,20 @@
 #define MAX_AMOUNT_OF_NODES 3
 #define SEND_SAVE 1
 #define RECV_SAVE 2
+#define MAX_FILE_DESCRIPTOR_LIST 3
 
 
 typedef struct  s_thread_sockets {
     int internal_server_port;
     int parent_socket;
 }   t_thread_sock;
+
+
+typedef struct  s_socket_identities {
+    int sockfd;
+    char *address;
+    struct s_socket_identities *next;
+}   t_id;
 
 /* This section is to expand the codebase to handle mutlipe client communication.
  */
@@ -163,7 +171,23 @@ void        daemon_recv_process(int sockfd);
 
 /* receive_handler.c */
 
-int remove_directory(const char *path);
+int         remove_directory(const char *path);
+
+/* sync_accept.c */
+
+void       sync_accept(int sockfd, t_id *file_list, struct sockaddr_in socket_address);
+
+/* sync_loop.c */
+
+void            sync_loop(int sockfd, int client_type, struct sockaddr_in socket_address);
+
+/* sync_update.c */
+
+int             sync_update(fd_set file_descriptor_list, int *file_list);
+
+/* socket_id_list_manager.c */
+
+t_id        *socket_id_list_manager(t_id *head_socket_id, int sockfd, char *address);
 
 /* handshake/file_list_linked_list_manager */
 
@@ -178,13 +202,17 @@ t_file_list		*new_file_list_node(char *filename,
 	time_t timestamp,
 	unsigned char *file_content);
 
+/* sync_accept.c */
+
+void       sync_accept(int sockfd, t_id  *file_list, struct sockaddr_in socket_address);
+
 /* handshake/serialize_transmission_buffer.c */
 
 unsigned char	*serialize_transmission_buffer(t_local_file_list *tramsmission_buffer_template);
 
 /* handshake/handshake.c */
 
-void	handshake(int sockfd, int client_type);
+unsigned char	*handshake(int sockfd, int client_type);
 unsigned char	*write_trust_key(void);
 
 /* handshake/number_of_files.c */

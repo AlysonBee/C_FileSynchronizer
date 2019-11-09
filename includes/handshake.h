@@ -7,6 +7,6 @@
 
 /* handshaking.c */
 
-void	handshake(int sockfd, int client_type);
+unsigned char	*handshake(int sockfd, int client_type);
 
 #endif
