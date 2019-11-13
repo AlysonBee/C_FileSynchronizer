@@ -1,116 +1,284 @@
 
 #include "../includes/file_sync.h"
+#include <errno.h>
+#include <poll.h>
+
+struct pollfd fds[4];
+int pollfd_list = 0;
 
 
-struct sockaddr_in      create_client_side_listening_socket(int *listen_sockfd)
-{
-    struct sockaddr_in  socket_address;
+void       push_pollfd_array(int sockfd) {
 
-    *listen_sockfd = socket(AF_INET, SOCK_STREAM, 0);
-    if (*listen_sockfd < 0)
-    {
-        perror("Error creating socket\n");
+    if (pollfd_list == 4) {
+        return ;
     }
+    struct pollfd fdlist_object;
+
+    fdlist_object.fd = sockfd;
+    fdlist_object.events = POLLIN;
+    if (pollfd_list == 0)
+
+    fdlist_object.revents = 0;
+    else fdlist_object.revents = POLLOUT;
+    fds[pollfd_list] = fdlist_object;
+    pollfd_list++;
+}
+
+
+typedef struct socket_list {
+    int sockfd;
+    struct socket_list *next;
+}   socket_t;
+
+socket_t *new_socket(int sockfd) {
+    socket_t *new_sock;
+
+    new_sock = (socket_t *)malloc(sizeof(socket_t));
+    new_sock->sockfd = sockfd;
+    new_sock->next = NULL;
+    return (new_sock);
+}
+
+socket_t *add_socket(socket_t *head, int sockfd) {
+    socket_t *trav;
+
+    trav = head;
+    while (trav->next)
+        trav = trav->next;
+    trav->next = (socket_t *)malloc(sizeof(socket_t));
+    trav->next->sockfd = sockfd;
+    trav->next->next = NULL;
+    return (trav);
+}
+
+socket_t *push_socket(socket_t *head, int sockfd) {
+    socket_t *trav;
+
+    trav = head;
+    if (trav == NULL)
+        head = new_socket(sockfd);
+    else {
+        trav = add_socket(head, sockfd);
+        trav = head;
+    }
+    return (head);
+}
+
+size_t LOCAL_PORT_ASSIGNMENT(void)
+{
+    char buffer[6];
+    struct stat info;
+    size_t size;
+
+    int fd = open("test_client.txt", O_RDONLY);
+    fstat(fd, &info);
+    bzero(buffer, 6);
+    read(fd, buffer, info.st_size);
+    size = atoi(buffer);
+    close(fd);
+    return (size);
+}
+
+
+void  reset_pollfds_list(socket_t *socket_list) {
+    socket_t *current_socket;
+
+    current_socket = socket_list;
+    while (current_socket) {
+        push_pollfd_array(current_socket->sockfd);
+        pollfd_list++;
+        current_socket = current_socket->next;
+    }
+}
+
+
+int accept_new_connection(int sockfd, struct sockaddr_in socket_address) {
+    int accept_socket;
+    socklen_t address_len;
+    char buffer[4096];
+
+    address_len = sizeof(socket_address);
+    accept_socket = accept(sockfd, (struct sockaddr *)&socket_address, &address_len);
+
+    if (accept_socket) {
+        printf("new connectin\n");
+        return (accept_socket);
+    }
+    return (-1);
+}
+
+
+
+int  checking_polling_list(int sockfd, int this_socket) {
+    int index;
+    char buffer[4096];
+    int flag = -1;
+
+    bzero(buffer, 4096);
+    index = 0;
+    while (index < pollfd_list) {
+
+        if (fds[index].fd == this_socket) {
+            
+            index++;
+            continue ;
+        }
+        if (fds[index].revents & POLLIN) {
+            //ssize_t size = read(fds[index].fd, buffer, 4096);
+           // DEBUG_BUFFER((unsigned char *)buffer, size);
+            printf("checking_polling_list ()\n");
+            handshake(fds[index].fd, CLIENT);
+            flag = 1;
+
+           // broadcast_message(fds[index].fd, buffer);
+        }
+        index++;
+    }
+    return (flag);
+}
+
+
+void            broadcast_new_node(unsigned char *remote_filesys, socket_t *socket_list,
+        int new_socket, int this_server_sock) {
+
+    socket_t    *current_socket;
+
+    current_socket = socket_list;
+    while (current_socket) {
+        if (current_socket->sockfd == new_socket || current_socket->sockfd == this_server_sock) {
+           current_socket = current_socket->next;
+           continue;
+        }
+        printf("broadcast_new_node()\n");
+        handshake(current_socket->sockfd, SERVER);
+        //write(current_socket->sockfd, remote_filesys, 4000);
+        current_socket = current_socket->next;
+    }
+}
+
+
+
+int        handle_client_side(socket_t *socket_list, int extra_socket) {
+
+    int counter = 0;
+    int flag = -1;
+
+    printf("Preemptive strike\n");
+
+    while (counter < pollfd_list) {
+        if (fds[counter].fd == extra_socket) {
+            if (fds[counter].revents & POLLIN) {
+                flag = 1;
+                printf("handle_client_side()\n");
+                handshake(fds[counter].fd, CLIENT);
+                break;
+            }
+        }
+        counter++;
+    }
+    return (flag);
+}
+
+struct sockaddr_in  create_client_side_server(int *sockfd) {
+    struct sockaddr_in socket_address;
+
+    *sockfd = socket(AF_INET, SOCK_STREAM, 0);
+    
+    if (*sockfd < 0)
+        perror("socket");
     memset(&socket_address, '\0', sizeof(socket_address));
     socket_address.sin_family = AF_INET;
     socket_address.sin_addr.s_addr = INADDR_ANY;
     socket_address.sin_port = htons(8942);
 
-    if (bind(*listen_sockfd, (struct sockaddr *)&socket_address, sizeof(socket_address)) < 0)
-    {
-        perror("Error binding\n");
-    }
-    
-    listen(*listen_sockfd, 5);
+    if (bind(*sockfd, (struct sockaddr *)&socket_address, sizeof(socket_address)) < 0) 
+        perror("binding");
+
+    if (listen(*sockfd, 5)) 
+        perror("listen");
 
     return (socket_address);
 }
 
 
-static int32_t  set_file_descriptors(fd_set *fd_list, t_id *file_list, int sockfd)
-{
-    int32_t     counter;
-    int32_t     max_file_descriptor;
-    t_id        *traverse_id;
-     
-    counter = 0;
-    traverse_id = file_list;
-    max_file_descriptor = sockfd;
-    FD_SET(sockfd, fd_list);
-    while (traverse_id)
-    {
-        FD_SET(traverse_id->sockfd, fd_list);
-        if (traverse_id->sockfd > max_file_descriptor)
-            max_file_descriptor = traverse_id->sockfd;
-        traverse_id = traverse_id->next;
-    }
-    return (max_file_descriptor);
-}
-
-static void     reset_file_descriptor_list(fd_set *fd_list, int sockfd)
-{
-    FD_ZERO(fd_list);
-    FD_SET(sockfd, fd_list);
-}
-
-void            sync_loop(int sockfd, int client_type, struct sockaddr_in socket_address)
+void            sync_loop(int sockfd, int client_type, struct sockaddr_in socket_address,
+        int extra_sock)
 {
     int32_t max_file_descriptor;
     int32_t trigger;
-    
-    fd_set  file_descriptor_list;
-    t_id    *file_list;
+     socket_t *socket_list;
+    int newsock;
 
-    file_list = NULL;
-    max_file_descriptor = sockfd;
-
-    // if user is client, a listening (server) socket has to be created
-    // for select() polling.
-    if (client_type == CLIENT)
-    {
-        int temporary_socket;
-        socket_address = create_client_side_listening_socket(&temporary_socket);
+   
+    socket_list = NULL;
+    int client_side; 
+    if (client_type == CLIENT) {
+        create_client_side_server(&client_side);
+        socket_list = push_socket(socket_list, client_side);
+        extra_sock = client_side;
        
-        file_list = socket_id_list_manager(file_list, temporary_socket, "NULL");
-       
-        sockfd = temporary_socket;
-        max_file_descriptor = temporary_socket;
     }
-    else
+    socket_list = push_socket(socket_list, sockfd);
+    if (extra_sock > -1)
+        socket_list = push_socket(socket_list, extra_sock);
+    //socket_list = push_socket(socket_list, sockfd);
+    int flag = -1;
+    while (42) 
     {
-        file_list = socket_id_list_manager(file_list, sockfd, "NULL");
-        max_file_descriptor = sockfd;
-    }
-    
-    
-    printf("entering 42\n");
-    while (42)
-    {
-        // Zero out file descriptor list and set sockfd to list.
-        reset_file_descriptor_list(&file_descriptor_list, sockfd);
-
-        // Set all file descriptors in list to file_descriptor
-        // and set max_file_descriptor value.
-        set_file_descriptors(&file_descriptor_list, file_list, sockfd);
-
-        printf("Blocked Trigger\n");
-        printf("max fd : %d\n", max_file_descriptor);
-        trigger = select(max_file_descriptor + 1,
-                        &file_descriptor_list, 
-                        NULL, NULL, NULL);
-        printf("trigger set : %d\n", trigger);
-        if (trigger)
-        {
-            if (FD_ISSET(sockfd, &file_descriptor_list))
-            {
-                sync_accept(sockfd, file_list, socket_address);
-            }
-            else
-                printf("Something's happening locally\n");
+        if (client_type == CLIENT)
+        printf("serverside socket is %d\n", client_side);
+        memset(fds, 0, sizeof(fds));
+        pollfd_list = 0;
+        reset_pollfds_list(socket_list);
+        if (client_type == CLIENT) {
+            fds[0].fd = client_side;
         }
+        printf("polling...\n");
+        trigger =  poll(fds, pollfd_list, 100000);
+        if (trigger) {
+            
+            if (client_type == CLIENT) {
+                flag = handle_client_side(socket_list, sockfd);
+            }
 
+            if (flag == 1) {
+                flag = -1;
+                continue ;
+            }
 
+            printf("fds[0] is %d\n", fds[0].fd);
+            checking_polling_list(sockfd, fds[0].fd);
+            if (fds[0].revents & POLLIN) {
+                printf("socket event\n");
+                printf("fd 0 is %d\n", fds[0].fd);
+                if (client_type == CLIENT)
+                    newsock = accept_new_connection(client_side, socket_address);
+                else
+                    newsock = accept_new_connection(sockfd, socket_address);
+                if (newsock) {
+                    printf("heere\n");
+                    printf("MAIN\n"); 
+
+                    unsigned char *remote_filesys = handshake(newsock, SERVER);
+
+                   // read(newsock, remote_filesys, 4096);
+
+                    printf("AGAIN\n");
+
+                    // TODO : TEST THIS
+                    broadcast_new_node(remote_filesys, socket_list, newsock, fds[0].fd);
+
+                    socket_list = push_socket(socket_list, newsock);
+                    printf("=======================================\n");
+                }
+            } /* else {
+                printf("ELSE CHECK POLLING\n");
+                checking_polling_list(sockfd);
+            } */
+        }
     }
+
+
 }
 
 

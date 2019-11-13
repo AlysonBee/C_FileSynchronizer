@@ -8,6 +8,7 @@ unsigned char    *receive_file_content(int sockfd)
     size_t        size;
 
 	recv(sockfd, local_buffer, 4096, -1);
+    sleep(2);
     size = strlen((char *)local_buffer);
     remote_filesystem = (unsigned char *)malloc(sizeof(unsigned char)
 		* size * 2);
@@ -17,22 +18,24 @@ unsigned char    *receive_file_content(int sockfd)
     return (remote_filesystem);
 } 
 
-int     sync_update(fd_set file_descriptor_list, int *file_list)
+int     sync_update(fd_set file_descriptor_list, t_id *file_list)
 {
-    int     counter;
+    t_id    *traverse_ids;
     unsigned char    *remote_filesystem;
 
-    counter = 0;
-    while (counter < MAX_FILE_DESCRIPTOR_LIST)
+    traverse_ids = file_list;
+    printf("sync update\n"); 
+    while (traverse_ids)
     {
-        if (FD_ISSET(file_list[counter], &file_descriptor_list))
+        if (FD_ISSET(traverse_ids->sockfd, &file_descriptor_list))
         {
-            remote_filesystem = receive_file_content(file_list[counter]);
+            printf(" is siet \n");
+            remote_filesystem = receive_file_content(traverse_ids->sockfd);
             resolve_file_conflicts(remote_filesystem);
             free(remote_filesystem);
             break;
         }
-        counter++;
+        traverse_ids = traverse_ids->next;
     } 
     return (0);
 }

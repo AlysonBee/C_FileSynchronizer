@@ -53,6 +53,7 @@ uint64_t	total_file_size(unsigned char *buffer)
 			buffer[counter + 2] == 0x66 &&
 			buffer[counter + 3] == 0x77)
 			{
+                printf("magic number found\n");
 				break;
 				magic_number_counter++;
 			}

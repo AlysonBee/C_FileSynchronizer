@@ -91,7 +91,7 @@ unsigned char	        *handshake(int sockfd, int client_type)
 	t_local_file_list	*transmission_buffer_template;	
 	unsigned char		*remote_filesystem;	
 
-	identify_connection(sockfd, client_type);
+	//identify_connection(sockfd, client_type);
 	file_list = gather_all_file_info();
 	files_count = number_of_files(file_list);
 	total_file_size = total_of_all_file_sizes(file_list);

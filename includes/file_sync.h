@@ -175,19 +175,22 @@ int         remove_directory(const char *path);
 
 /* sync_accept.c */
 
-void       sync_accept(int sockfd, t_id *file_list, struct sockaddr_in socket_address);
+t_id        *sync_accept(int sockfd, t_id *file_list, struct sockaddr_in socket_address,
+        int server_socket);
 
 /* sync_loop.c */
 
-void            sync_loop(int sockfd, int client_type, struct sockaddr_in socket_address);
+void            sync_loop(int sockfd, int client_type, struct sockaddr_in socket_address,
+        int extra_sock);
 
-/* sync_update.c */
-
-int             sync_update(fd_set file_descriptor_list, int *file_list);
 
 /* socket_id_list_manager.c */
 
 t_id        *socket_id_list_manager(t_id *head_socket_id, int sockfd, char *address);
+
+/* sync_update.c */
+
+int     sync_update(fd_set file_descriptor_list, t_id *file_list);
 
 /* handshake/file_list_linked_list_manager */
 
@@ -202,9 +205,6 @@ t_file_list		*new_file_list_node(char *filename,
 	time_t timestamp,
 	unsigned char *file_content);
 
-/* sync_accept.c */
-
-void       sync_accept(int sockfd, t_id  *file_list, struct sockaddr_in socket_address);
 
 /* handshake/serialize_transmission_buffer.c */
 

@@ -31,7 +31,7 @@ void		directory_path_management(t_file_list *file_info)
 			if (check_folder_path_exists(directory_name) == false)
 			{
 				printf(">");
-				printf("CREATING %s\n", directory_name);
+			//  printf("CREATING %s\n", directory_name);
 				mkdir(directory_name, 0755);
 			//	create_subdirectory(counter, file_info);
 			}
@@ -55,7 +55,7 @@ void		    overwrite_older_file_version(t_file_list *file_to_change)
 	{
 		directory_path_management(file_to_change);
 	}
-	printf("CREATING FILE : %s\n", file_to_change->filename);
+//	printf("CREATING FILE : %s\n", file_to_change->filename);
 	write_file_content(file_to_change);
 }
 
@@ -71,7 +71,7 @@ void			resolve_file_conflicts(unsigned char *remote_file_system)
 		remote_file_system
 	);
 	traverse_list = remote_node_file_list;
-	print_file_list(traverse_list);
+	//:print_file_list(traverse_list);
 	while (traverse_list)
 	{
 		if (!isprint(traverse_list->filename[0]))
