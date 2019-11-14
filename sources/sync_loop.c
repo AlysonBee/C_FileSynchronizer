@@ -16,10 +16,10 @@ void       push_pollfd_array(int sockfd) {
 
     fdlist_object.fd = sockfd;
     fdlist_object.events = POLLIN;
-    if (pollfd_list == 0)
+    //if (pollfd_list == 0)
 
     fdlist_object.revents = 0;
-    else fdlist_object.revents = POLLOUT;
+    /*else fdlist_object.revents = POLLOUT; */
     fds[pollfd_list] = fdlist_object;
     pollfd_list++;
 }
@@ -51,6 +51,17 @@ socket_t *add_socket(socket_t *head, int sockfd) {
     return (trav);
 }
 
+bool    does_number_exist(socket_t *head, int to_push) {
+    socket_t *current;
+
+    current = head;
+    while (current) {
+        if (to_push == current->sockfd)
+            return true;
+    }
+    return false;
+}
+
 socket_t *push_socket(socket_t *head, int sockfd) {
     socket_t *trav;
 
@@ -58,10 +69,22 @@ socket_t *push_socket(socket_t *head, int sockfd) {
     if (trav == NULL)
         head = new_socket(sockfd);
     else {
+     //   if (does_number_exist(head, sockfd) == true)
+       //     return (head);
         trav = add_socket(head, sockfd);
         trav = head;
     }
     return (head);
+}
+
+void print_linked_list(socket_t *head) {
+    socket_t *current;
+
+    current = head;
+    while (current) {
+        printf("%d  -> ", current->sockfd);
+        current = current->next;
+    }
 }
 
 size_t LOCAL_PORT_ASSIGNMENT(void)
@@ -79,14 +102,12 @@ size_t LOCAL_PORT_ASSIGNMENT(void)
     return (size);
 }
 
-
 void  reset_pollfds_list(socket_t *socket_list) {
     socket_t *current_socket;
 
     current_socket = socket_list;
     while (current_socket) {
         push_pollfd_array(current_socket->sockfd);
-        pollfd_list++;
         current_socket = current_socket->next;
     }
 }
@@ -109,30 +130,48 @@ int accept_new_connection(int sockfd, struct sockaddr_in socket_address) {
 
 
 
-int  checking_polling_list(int sockfd, int this_socket) {
+void   broadcast_message(int transmitter, int this_socket, socket_t *sockets) {
+    socket_t *current;
+
+    current = sockets;
+    while (current) {
+        if (current->sockfd == this_socket || current->sockfd == transmitter) {
+            current = current->next;
+            continue ;
+        }
+        handshake(current->sockfd, SERVER);
+        current = current->next;
+    }
+}
+
+int  checking_polling_list(int sockfd, int this_socket, socket_t *sockets) {
     int index;
     char buffer[4096];
     int flag = -1;
+    socket_t *current_list;
 
+     
     bzero(buffer, 4096);
     index = 0;
+    index = 0;
     while (index < pollfd_list) {
-
+        
         if (fds[index].fd == this_socket) {
             
             index++;
             continue ;
-        }
-        if (fds[index].revents & POLLIN) {
+        } 
+        if (fds[index].revents) {
             //ssize_t size = read(fds[index].fd, buffer, 4096);
            // DEBUG_BUFFER((unsigned char *)buffer, size);
             printf("checking_polling_list ()\n");
             handshake(fds[index].fd, CLIENT);
-            flag = 1;
-
-           // broadcast_message(fds[index].fd, buffer);
-        }
-        index++;
+            flag = fds[index].fd;
+            
+           broadcast_message(fds[index].fd, this_socket, sockets);
+        } 
+        index++; 
+        
     }
     return (flag);
 }
@@ -179,6 +218,18 @@ int        handle_client_side(socket_t *socket_list, int extra_socket) {
     return (flag);
 }
 
+static int DEBUG_SOCKET(void) {
+    int fd = open("test_client.txt", O_RDONLY);
+    char buffer[4096];
+    bzero(buffer, 4096);
+
+    read(fd, buffer, 4096);
+    printf("PORT NUMBER : %s\n", buffer);
+    close(fd);
+    return (atoi(buffer));
+}
+
+
 struct sockaddr_in  create_client_side_server(int *sockfd) {
     struct sockaddr_in socket_address;
 
@@ -189,7 +240,7 @@ struct sockaddr_in  create_client_side_server(int *sockfd) {
     memset(&socket_address, '\0', sizeof(socket_address));
     socket_address.sin_family = AF_INET;
     socket_address.sin_addr.s_addr = INADDR_ANY;
-    socket_address.sin_port = htons(8942);
+    socket_address.sin_port = htons(DEBUG_SOCKET());
 
     if (bind(*sockfd, (struct sockaddr *)&socket_address, sizeof(socket_address)) < 0) 
         perror("binding");
@@ -209,7 +260,7 @@ void            sync_loop(int sockfd, int client_type, struct sockaddr_in socket
      socket_t *socket_list;
     int newsock;
 
-   
+   int death = extra_sock;
     socket_list = NULL;
     int client_side; 
     if (client_type == CLIENT) {
@@ -219,8 +270,8 @@ void            sync_loop(int sockfd, int client_type, struct sockaddr_in socket
        
     }
     socket_list = push_socket(socket_list, sockfd);
-    if (extra_sock > -1)
-        socket_list = push_socket(socket_list, extra_sock);
+    if (death > -1)
+        socket_list = push_socket(socket_list, death);
     //socket_list = push_socket(socket_list, sockfd);
     int flag = -1;
     while (42) 
@@ -230,24 +281,31 @@ void            sync_loop(int sockfd, int client_type, struct sockaddr_in socket
         memset(fds, 0, sizeof(fds));
         pollfd_list = 0;
         reset_pollfds_list(socket_list);
-        if (client_type == CLIENT) {
+        /*if (client_type == CLIENT) {
             fds[0].fd = client_side;
-        }
+        }*/
         printf("polling...\n");
+        int x = 0;
+        while (x < pollfd_list) {
+            printf("fd : %d\n", fds[x].fd);
+            x++;
+        }
+        print_linked_list(socket_list);
         trigger =  poll(fds, pollfd_list, 100000);
         if (trigger) {
             
-            if (client_type == CLIENT) {
+            if (client_type == CLIENT && flag == -1) {
                 flag = handle_client_side(socket_list, sockfd);
             }
 
-            if (flag == 1) {
-                flag = -1;
+          /*  if (flag == -1) {
+                flag = 1;
+                printf("CONTINUING\n");
                 continue ;
-            }
+            } */
 
             printf("fds[0] is %d\n", fds[0].fd);
-            checking_polling_list(sockfd, fds[0].fd);
+            checking_polling_list(sockfd, fds[0].fd,socket_list );
             if (fds[0].revents & POLLIN) {
                 printf("socket event\n");
                 printf("fd 0 is %d\n", fds[0].fd);
@@ -275,6 +333,7 @@ void            sync_loop(int sockfd, int client_type, struct sockaddr_in socket
                 printf("ELSE CHECK POLLING\n");
                 checking_polling_list(sockfd);
             } */
+            flag = -1;
         }
     }
 
