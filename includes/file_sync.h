@@ -181,7 +181,7 @@ t_id        *sync_accept(int sockfd, t_id *file_list, struct sockaddr_in socket_
 /* sync_loop.c */
 
 void            sync_loop(int sockfd, int client_type, struct sockaddr_in socket_address,
-        int extra_sock);
+        int extra_sock, char *ip);
 
 
 /* socket_id_list_manager.c */
@@ -260,5 +260,10 @@ void			resolve_file_conflicts(unsigned char *remote_file_system);
 void		    overwrite_older_file_version(t_file_list *file_to_change);
 bool		check_folder_path_exists(char *directory_name);
 void		directory_path_management(t_file_list *file_info);
+
+
+/* networking/propagate.c */
+unsigned char   *broadcast_recv(int sockfd);
+void broadcast_send(int sockfd, unsigned char *filesys);
 
 #endif
