@@ -36,7 +36,8 @@ static void 	server_loop(int sockfd,
 	unsigned char *buffer = handshake(accept_socket, SERVER);
     
     free(buffer);
-    sync_loop(sockfd, SERVER, socket_address, accept_socket);
+    char *ip = inet_ntoa(socket_address.sin_addr);
+    sync_loop(sockfd, SERVER, socket_address, accept_socket, ip);
 
     //printf("Server spinning a daemon...\n");
     //user_loop(accept_socket, socket_address);

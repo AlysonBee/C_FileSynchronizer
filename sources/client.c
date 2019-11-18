@@ -8,7 +8,7 @@ void	client_loop(int sockfd, struct sockaddr_in socket_address)
      unsigned char *buffer = handshake(sockfd, CLIENT);
 
      free(buffer);
-    sync_loop(sockfd, CLIENT, socket_address, -1);
+    sync_loop(sockfd, CLIENT, socket_address, -1, NULL);
 	return ;
 }
 

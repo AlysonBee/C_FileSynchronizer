@@ -269,16 +269,16 @@ void            sync_loop(int sockfd, int client_type,
     if (client_type == CLIENT) {
         struct sockaddr_in client_address;
         client_address = create_client_side_server(&client_side);
-        char *clientip = inet_ntoa(client_address);
+        char *clientip = inet_ntoa(client_address.sin_addr);
         socket_list = push_socket(socket_list, client_side, clientip);
         extra_sock = client_side;
        
     }
     char *ip = inet_ntoa(socket_address.sin_addr);
-    socket_list = push_socket(socket_list, sockfd);
+    socket_list = push_socket(socket_list, sockfd, ip);
     if (death > -1)
-        socket_list = push_socket(socket_list, death);
-    //socket_list = push_socket(socket_list, sockfd);
+        socket_list = push_socket(socket_list, death, extra_ip);
+    
     int flag = -1;
     while (42) 
     {
@@ -332,8 +332,8 @@ void            sync_loop(int sockfd, int client_type,
 
                     // TODO : TEST THIS
                     broadcast_new_node(remote_filesys, socket_list, newsock, fds[0].fd);
-
-                    socket_list = push_socket(socket_list, newsock);
+                    ip = inet_ntoa(socket_address.sin_addr);
+                    socket_list = push_socket(socket_list, newsock, ip);
                     printf("=======================================\n");
                 }
             } /* else {
