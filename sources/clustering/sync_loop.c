@@ -131,6 +131,7 @@ void   broadcast_message(int transmitter, int this_socket, socket_t *sockets,
             current = current->next;
             continue ;
         }
+        //handshake(current->sockfd, SERVER);
         broadcast_send(current->sockfd, remote_filesys);
         current = current->next;
     }
@@ -154,13 +155,15 @@ int  checking_polling_list(int sockfd, int this_socket, socket_t *sockets) {
             continue ;
         } 
         if (fds[index].revents) {
-            
+            //ssize_t size = read(fds[index].fd, buffer, 4096);
+           // DEBUG_BUFFER((unsigned char *)buffer, size);
             printf("checking_polling_list ()\n");
 
             unsigned char *remote_filesys = NULL;
 
             remote_filesys = broadcast_recv(fds[index].fd);
              
+            //handshake(fds[index].fd, CLIENT);
             flag = fds[index].fd;
             
             broadcast_message(fds[index].fd, this_socket, sockets, remote_filesys);
@@ -250,46 +253,44 @@ struct sockaddr_in  create_client_side_server(int *sockfd) {
 }
 
 
-socket_t        *assign_client_socket(int *client_side, socket_t *socket_list)
-{
-    struct sockaddr_in client_address;
-    char *client_ip;
-
-    create_client_side_server(client_side);
-    client_ip = inet_ntoa(client_address.sin_addr);
-    socket_list = push_socket(socket_list, *client_side, client_ip);
-    return (socket_list);
-}
-
 void            sync_loop(int sockfd, int client_type, 
             struct sockaddr_in socket_address,
             int extra_sock, char *extra_ip)
 {
-    int32_t         max_file_descriptor;
-    int32_t         trigger;
-    socket_t        *socket_list;
-    int             newsock;
+    int32_t max_file_descriptor;
+    int32_t trigger;
+     socket_t *socket_list;
+    int newsock;
    
-    int             death = extra_sock;
-    int             client_side;
-    char            *ip;
-    unsigned char   *remote_filesys;
 
+   int death = extra_sock;
     socket_list = NULL;
-    if (client_type == CLIENT)
-        socket_list = assign_client_socket(&client_side, socket_list);
-    
-    ip = inet_ntoa(socket_address.sin_addr);
+    int client_side; 
+    if (client_type == CLIENT) {
+        struct sockaddr_in client_address;
+        client_address = create_client_side_server(&client_side);
+        char *clientip = inet_ntoa(client_address.sin_addr);
+        socket_list = push_socket(socket_list, client_side, clientip);
+        extra_sock = client_side;
+       
+    }
+    char *ip = inet_ntoa(socket_address.sin_addr);
     socket_list = push_socket(socket_list, sockfd, ip);
-
     if (death > -1)
         socket_list = push_socket(socket_list, death, extra_ip);
     
+    int flag = -1;
     while (42) 
     {
+        if (client_type == CLIENT)
+        printf("serverside socket is %d\n", client_side);
         memset(fds, 0, sizeof(fds));
         pollfd_list = 0;
         reset_pollfds_list(socket_list);
+        /*if (client_type == CLIENT) {
+            fds[0].fd = client_side;
+        }*/
+        printf("polling...\n");
         int x = 0;
         while (x < pollfd_list) {
             printf("fd : %d\n", fds[x].fd);
@@ -298,20 +299,48 @@ void            sync_loop(int sockfd, int client_type,
         print_linked_list(socket_list);
         trigger =  poll(fds, pollfd_list, 100000);
         if (trigger) {
+           /* 
+            if (client_type == CLIENT && flag == -1) {
+
+                flag = handle_client_side(socket_list, sockfd);
+            } */
+
+          /*  if (flag == -1) {
+                flag = 1;
+                printf("CONTINUING\n");
+                continue ;
+            } */
+
+            printf("fds[0] is %d\n", fds[0].fd);
             checking_polling_list(sockfd, fds[0].fd,socket_list );
             if (fds[0].revents & POLLIN) {  
+                printf("socket event\n");
+                printf("fd 0 is %d\n", fds[0].fd);
                 if (client_type == CLIENT)
                     newsock = accept_new_connection(client_side, socket_address);
                 else
                     newsock = accept_new_connection(sockfd, socket_address);
                 if (newsock) {
-                    remote_filesys = handshake(newsock, SERVER);
+                    printf("heere\n");
+                    printf("MAIN\n"); 
+
+                    unsigned char *remote_filesys = handshake(newsock, SERVER);
+
+                   // read(newsock, remote_filesys, 4096);
+
+                    printf("AGAIN\n");
+
+                    // TODO : TEST THIS
                     broadcast_new_node(remote_filesys, socket_list, newsock, fds[0].fd);
-                    
                     ip = inet_ntoa(socket_address.sin_addr);
                     socket_list = push_socket(socket_list, newsock, ip);
+                    printf("=======================================\n");
                 }
-            }
+            } /* else {
+                printf("ELSE CHECK POLLING\n");
+                checking_polling_list(sockfd);
+            } */
+            flag = -1;
         }
     }
 
