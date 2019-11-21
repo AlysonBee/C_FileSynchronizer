@@ -2,6 +2,32 @@
 #include <sys/mman.h>
 #include "../includes/file_sync.h"
 
+
+
+char    *command_shell(void)
+{
+    char buffer[4096];
+
+    printf("command_shell \n");
+    while (true)
+    {
+        bzero(buffer, 4096);
+        write(1, "Node type:", 10);
+        read(0, buffer, 4096);
+        if (strlen(buffer) == 0)
+        {
+            continue;
+        }
+        else if (strncmp(buffer, "API", 3) == 0)
+            return (strdup("API"));
+        else if (strncmp(buffer, "USER", 4) == 0)
+            return (strdup("USER"));
+        else
+            printf("Invalid shell command\n");
+    }
+}
+
+
 void	print_file_list(t_file_list *head)
 {
 	t_file_list		*traverse;

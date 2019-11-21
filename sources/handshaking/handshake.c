@@ -2,7 +2,6 @@
 
 #include "../../includes/handshake.h"
 
-
 static bool			assert_trust_key_is_true(unsigned char *transmission_buffer)
 {
 	int32_t			counter;
@@ -82,6 +81,8 @@ static bool				identify_connection(int sockfd, int client_type)
 	free(return_value);
 	return (true);
 }
+
+
 
 unsigned char	        *handshake(int sockfd, int client_type)
 {

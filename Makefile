@@ -32,7 +32,8 @@ source_list = main.c initialize_daemon.c utils.c server.c client.c \
 	user_loop_socket_monitor.c \
 	file_and_timestamp_linked_list_manager.c  \
 	hash.c shasumfile.c receive_handler.c sync_accept.c \
-	sync_loop.c sync_update.c socket_id_list_manager.c
+	sync_loop.c sync_update.c socket_id_list_manager.c \
+	access_control.c
 
 flags = -Wall -Wextra -pedantic -pedantic-errors
 

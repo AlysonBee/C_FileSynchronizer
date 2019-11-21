@@ -27,17 +27,20 @@ int		accept_loop(int *sockfd, struct sockaddr_in socket_address)
 }
 
 static void 	server_loop(int sockfd, 
-	struct sockaddr_in socket_address)
+	struct sockaddr_in socket_address, int usertype)
 {
 	int accept_socket;
+    unsigned char *buffer;
 
 	accept_socket = accept_loop(&sockfd, socket_address);
-	
-	unsigned char *buffer = handshake(accept_socket, SERVER);
-    
-    free(buffer);
+    	
+    if (user_access_or_node(accept_socket, SERVER, usertype) == true)
+    {
+	    buffer = handshake(accept_socket, SERVER);
+        free(buffer);
+    }
     char *ip = inet_ntoa(socket_address.sin_addr);
-    sync_loop(sockfd, SERVER, socket_address, accept_socket, ip);
+    sync_loop(sockfd, SERVER, socket_address, accept_socket, ip, usertype);
 
     //printf("Server spinning a daemon...\n");
     //user_loop(accept_socket, socket_address);
@@ -47,8 +50,9 @@ static void 	server_loop(int sockfd,
 
 void	server(char **argv)
 {
-	int sockfd;
+	int                 sockfd;
 	struct sockaddr_in	socket_address;
+    int                 usertype;
 
 	sockfd = socket(AF_INET, SOCK_STREAM, 0);
 	if (sockfd < 0)
@@ -72,6 +76,7 @@ void	server(char **argv)
 	{
 		perror("listen");
 		return ;
-	}
-	server_loop(sockfd, socket_address);
+    }
+    usertype = APITYPE;
+	server_loop(sockfd, socket_address, usertype);
 }

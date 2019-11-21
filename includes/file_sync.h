@@ -32,6 +32,12 @@
 #define MAX_FILE_DESCRIPTOR_LIST 3
 
 
+#define USER "USER" // have better protocol design for this.
+#define API "API" // This will be an encryption key.
+#define USERTYPE 1
+#define APITYPE 2
+
+
 typedef struct  s_thread_sockets {
     int internal_server_port;
     int parent_socket;
@@ -121,6 +127,7 @@ void	DEBUG_BUFFER_TO_FILE(unsigned char *buffer_start, uint64_t byte_count,
 	char *filename);
 uint64_t	total_file_size(unsigned char *buffer);
 bool    diff_detector(char *filename1, char *filename2);
+char    *command_shell(void);
 
 /* server.c */
 
@@ -181,7 +188,7 @@ t_id        *sync_accept(int sockfd, t_id *file_list, struct sockaddr_in socket_
 /* sync_loop.c */
 
 void            sync_loop(int sockfd, int client_type, struct sockaddr_in socket_address,
-        int extra_sock, char *ip);
+        int extra_sock, char *ip, int user_or_api);
 
 
 /* socket_id_list_manager.c */
@@ -191,6 +198,11 @@ t_id        *socket_id_list_manager(t_id *head_socket_id, int sockfd, char *addr
 /* sync_update.c */
 
 int     sync_update(fd_set file_descriptor_list, t_id *file_list);
+
+/* access_control.c */
+
+bool           user_access_or_node(int sockfd, int client_type,
+        int share_or_sync);
 
 /* handshake/file_list_linked_list_manager */
 

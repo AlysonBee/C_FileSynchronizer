@@ -28,6 +28,7 @@ void       push_pollfd_array(int sockfd) {
 typedef struct socket_list {
     int sockfd;
     char *ip;
+    bool sync_or_not;
     struct socket_list *next;
 }   socket_t;
 
@@ -263,7 +264,7 @@ socket_t        *assign_client_socket(int *client_side, socket_t *socket_list)
 
 void            sync_loop(int sockfd, int client_type, 
             struct sockaddr_in socket_address,
-            int extra_sock, char *extra_ip)
+            int extra_sock, char *extra_ip, int user_or_api)
 {
     int32_t         max_file_descriptor;
     int32_t         trigger;
@@ -305,9 +306,14 @@ void            sync_loop(int sockfd, int client_type,
                 else
                     newsock = accept_new_connection(sockfd, socket_address);
                 if (newsock) {
-                    remote_filesys = handshake(newsock, SERVER);
-                    broadcast_new_node(remote_filesys, socket_list, newsock, fds[0].fd);
-                    
+
+                    printf("NEW SOCKET\n");
+                    if (user_access_or_node(newsock, SERVER, -1) == true)
+                    {
+	                    remote_filesys = handshake(newsock, SERVER);
+                        //remote_filesys = handshake(newsock, SERVER);
+                        broadcast_new_node(remote_filesys, socket_list, newsock, fds[0].fd);
+                    } 
                     ip = inet_ntoa(socket_address.sin_addr);
                     socket_list = push_socket(socket_list, newsock, ip);
                 }
