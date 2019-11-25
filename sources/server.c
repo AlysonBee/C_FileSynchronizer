@@ -31,10 +31,11 @@ static void 	server_loop(int sockfd,
 {
 	int accept_socket;
     unsigned char *buffer;
+    unsigned char local[4096];
 
 	accept_socket = accept_loop(&sockfd, socket_address);
-    	
-    if (user_access_or_node(accept_socket, SERVER, usertype) == true)
+    bzero(local, 4096);	
+    if (user_access_or_node(accept_socket, SERVER, usertype, local) == true)
     {
 	    buffer = handshake(accept_socket, SERVER);
         free(buffer);

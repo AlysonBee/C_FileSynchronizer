@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script> 
+  <meta charset="UTF-8">
+  <title></title>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Montserrat:400,700'>
+  <link rel="stylesheet" href="{{ url_for('static', filename='Kickass/css/style.css') }}">
+  
+  <style>
+    #hidden {
+      display: none;
+    }
+  </style>
+</head>
+
+
+<body>
+
+  <header class="open">
+    <button class="open"></button>
+  </header> 
+
+  <nav>
+    <ul>
+      
+      <li>What Is It</li>
+      <li>For Creatives</li>
+      <li>For Contributors</li>
+      <li id='back'>Home</li>
+    </ul>
+    <div id="nav-close"><i class="fas fa-times"></i></div>
+  </nav>
+
+
+  <content>
+    <section>
+      <div class="container" id="hidden">
+      <h1>What is it</h1><br>
+        <p>This project is about making a faster, easier way to prototype chatbots and dialogue for creative projects.</p>
+        <p>It's as simple as writing a short story or blog post. No tagging or dialogue trees</p>
+        <p>All the info you write will be integrated into its responses naturally.</p>
+      </div>
+    </section>
+    <section>
+      <div class="container">
+      <h1>For Creatives</h1><br>
+        <p>Populate your digital world with NPCs or build a QandA bot.</p><br>
+        <p>Download your created bot to run locally or point to it's unique API endpoint to retrieve responses.</p><br>
+        <p>
+      </div>
+    </section>
+    <section>
+      <div class="container">
+        <h1>For Contributors</h1><br>
+          <p>Contribute your bot to the network and offer up it's responses and knowledge to other bots, making each creation more immersive.</p><br>
+          <p>This current POC is running a TimeKeeping bot and CakeChat.</p> 
+      </div>
+    </section>
+  </content>
+
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script>
+  <script  src="{{ url_for('static', filename='Kickass/js/index.js') }}"></script>
+
+
+  <script>
+    $(document).ready(function() {
+      $('div.container').fadeIn(1000).removeAttr('id')
+    })
+  </script>
+
+</body>
+
+</html>

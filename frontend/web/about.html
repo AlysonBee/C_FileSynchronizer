@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en" >
+
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script> 
+  <meta charset="UTF-8">
+  <title></title>
+  <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+  
+  <link rel='stylesheet' href='https://fonts.googleapis.com/css?family=Montserrat:400,700'>
+  <link rel="stylesheet" href="css/about.css">
+  
+  <style>
+    #hidden {
+      display: none;
+    }
+  </style>
+</head>
+
+
+<body>
+
+  <header class="open">
+    <button class="open"></button>
+  </header> 
+
+  <nav>
+    <ul>
+      
+      <li>A Peer to Peer Network</li>
+      <li>A Distributed Network</li>
+      <li>For Contributors</li>
+      <li>
+        <span onclick="window.location.href='./flashy.html';">
+        Home
+      </span>
+      </li>
+    </ul>
+    <div id="nav-close"><i class="fas fa-times"></i></div>
+  </nav>
+
+
+  <content>
+    <section>
+      <div class="container" id="hidden">
+      <h1>A Peer to Peer API Network</h1><br>
+        <p>Host an API on your local machine or make use of ones on the network.</p>
+        <p>Because hosting is covered, you're in control of pricing for your<br>API keys.  
+      </div>
+    </section>
+    <section>
+      <div class="container">
+      <h1>A Distributed API Network</h1><br>
+        <p>Code applications that make use of swarm logic; from botnets to shared applications
+        to online video games.<br>Need to make use of a Windows app on your Linux machine? Use foreign resources.
+        <p>
+      </div>
+    </section>
+    <section>
+      <div class="container">
+        <h1>For Contributors</h1><br>
+          <p>API libraries for Python and Go are currently under development which will allow you to code your apps to interact with other resources on the network
+      </div>
+    </section>
+  </content>
+
+  <script src='https://cdnjs.cloudflare.com/ajax/libs/jquery/3.1.1/jquery.min.js'></script>
+  <script  src="js/about.js"></script>
+
+
+  <script>
+    $(document).ready(function() {
+      $('div.container').fadeIn(1000).removeAttr('id')
+    })
+  </script>
+
+</body>
+
+</html>

@@ -7,9 +7,10 @@ void	client_loop(int sockfd, struct sockaddr_in socket_address, int usertype)
 {
     unsigned char   *buffer;
     bool            flag;
+    unsigned char   local[4096];
 
     printf("usertype : %d\n", usertype);
-    flag = user_access_or_node(sockfd, CLIENT, usertype);
+    flag = user_access_or_node(sockfd, CLIENT, usertype, local);
     if (flag == true)
     {
         buffer = handshake(sockfd, CLIENT);

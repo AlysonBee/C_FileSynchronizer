@@ -67,5 +67,6 @@ unsigned char   *broadcast_recv(int sockfd)
     printf("ending\n");
     resolve_file_conflicts(remote_filesystem);
     printf("resolved\n");
+    return (remote_filesystem);
 }
 

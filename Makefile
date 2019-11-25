@@ -7,6 +7,8 @@ networking_directory = sources/networking/
 
 sources_directory = sources/
 
+api_directory = sources/api/
+
 handshake_directory = sources/handshaking/
 
 objects_directory = objects/
@@ -26,13 +28,15 @@ handshake_list = handshake.c \
 		directory_linked_list_manager.c \
 		resolve_file_conflicts.c
 
-networking_list = propagate_data.c 
+networking_list = propagate_data.c socket_list_manager.c \
+				 multiclient.c 
+
+api_list = handle_api_request.c
 
 source_list = main.c initialize_daemon.c utils.c server.c client.c \
-	user_loop_socket_monitor.c \
 	file_and_timestamp_linked_list_manager.c  \
-	hash.c shasumfile.c receive_handler.c sync_accept.c \
-	sync_loop.c sync_update.c socket_id_list_manager.c \
+	shasumfile.c \
+	sync_loop.c  \
 	access_control.c
 
 flags = -Wall -Wextra -pedantic -pedantic-errors
@@ -42,35 +46,21 @@ links = -lpthread
 networking_object_list = $(networking_list:.c=.o)
 handshake_objects_list = $(handshake_list:.c=.o)
 objects_list = $(source_list:.c=.o)
-
+api_object_list = $(api_list:.c=.o)
 
 alylibc_archive = $(addprefix $(alylibc), $(alylibc_a))
 handshakes = $(addprefix $(handshake_directory), $(handshake_list))
+apis = $(addprefix $(api_directory), $(api_list))
 networking = $(addprefix $(networking_directory), $(networking_list))
 sources = $(addprefix $(sources_directory), $(source_list))
-objects = $(addprefix $(objects_directory), $(objects_list) $(handshake_objects_list)	$(networking_object_list))
+objects = $(addprefix $(objects_directory), $(objects_list) $(handshake_objects_list) $(networking_object_list) $(api_object_list))
 
-UNAME_S := $(shell uname -s)
-
-ifeq ($(UNAME_S),Darwin)
-   install_tool = brew install
-   installs = fswatch
-else
-   install_tool = sudo apt-get install
-   installs = inotify
-endif
-
-
-dependencies:
-
-	$(install_tool) $(installs)
 
 all:
-	echo $(UNAME_S)
 	make all -C $(alylibc)
-	gcc -c $(flags) $(sources) $(handshakes) $(networking)
-	gcc -o $(executable) $(objects_list) $(handshake_objects_list) $(networking_object_list) $(alylibc_archive) $(links)
-	mv $(objects_list) $(handshake_objects_list) $(networking_object_list) $(objects_directory) 
+	gcc -c $(flags) $(sources) $(handshakes) $(networking) $(apis)
+	gcc -o $(executable) $(objects_list) $(handshake_objects_list) $(networking_object_list) $(api_object_list) $(alylibc_archive) $(links)
+	mv $(objects_list) $(handshake_objects_list) $(networking_object_list) $(api_object_list) $(objects_directory)  
 
 clean:
 	make clean -C $(alylibc)

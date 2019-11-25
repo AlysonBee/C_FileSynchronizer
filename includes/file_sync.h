@@ -37,7 +37,7 @@
 #define USERTYPE 1
 #define APITYPE 2
 
-
+// TO DELETE
 typedef struct  s_thread_sockets {
     int internal_server_port;
     int parent_socket;
@@ -49,6 +49,43 @@ typedef struct  s_socket_identities {
     char *address;
     struct s_socket_identities *next;
 }   t_id;
+
+///////////////////////////////////
+
+/* Socket list of connected nodes.
+*/
+
+typedef struct socket_list {
+    int sockfd;
+    char *ip;
+    bool sync;
+    bool api_socket;
+    char *app_name;
+    struct socket_list *next;
+}   socket_t;
+
+
+/* api/handle_api_request.c */
+
+bool    check_api_request(socket_t *socket_list, unsigned char *buffer,
+        int sockfd);
+
+
+/* networking/socket_list_manager.c */
+
+socket_t       *push_socket(socket_t *head, int sockfd, char *ip, bool sync,
+            char *app_name);
+void            print_linked_list(socket_t *head);
+
+/* networking/multiclient.c */
+
+void            broadcast_new_node(unsigned char *remote_filesys,
+    socket_t *socket_list,
+    int new_socket,
+    int this_server_sock);
+void            broadcast_message(int transmitter, int this_socket, socket_t *sockets,
+        unsigned char *remote_filesys);
+
 
 /* This section is to expand the codebase to handle mutlipe client communication.
  */
@@ -202,7 +239,8 @@ int     sync_update(fd_set file_descriptor_list, t_id *file_list);
 /* access_control.c */
 
 bool           user_access_or_node(int sockfd, int client_type,
-        int share_or_sync);
+        int share_or_sync, unsigned char buffer []);
+bool            application_joining_network(unsigned char buffer []);
 
 /* handshake/file_list_linked_list_manager */
 

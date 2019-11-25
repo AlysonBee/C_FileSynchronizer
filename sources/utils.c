@@ -2,7 +2,14 @@
 #include <sys/mman.h>
 #include "../includes/file_sync.h"
 
+char    *api_requesting_to_sync(int sockfd)
+{
+    char buffer[4096];
 
+    bzero(buffer, 4096);
+    printf("API requesting to synchronize\n");
+    recv(sockfd, buffer, 4096, 0);    
+}
 
 char    *command_shell(void)
 {
